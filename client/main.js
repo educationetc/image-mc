@@ -17,7 +17,6 @@ Template.app.helpers({
   },
 
   image() {
-  	console.log(Session.get)
   	return (Session.get('index') < 8 ? 'non-calc/' : 'calc/') + Session.get('questions')[(parseInt(Session.get('index')))].q + (Session.get('mode') === 'check' ? 's' : '') + '.png';
   },
 
@@ -88,7 +87,7 @@ Template['check-footer'].helpers({
 });
 
 function updateTime() {
-	var n = 1000 * 60 * (Session.get('mode') === 'test' ? 1 : 1) - Date.now() + Session.get('start-time');
+	var n = 1000 * 60 * (Session.get('mode') === 'test' ? .1 : .1) - Date.now() + Session.get('start-time');
 
 	if (n < 0) {
 		if (Session.get('mode') == 'test') {
@@ -96,12 +95,19 @@ function updateTime() {
 			Session.set('start-time', Date.now());
 			Session.set('mode', 'check');
 		} else {
-			var r = [];
-			$.each((Session.get('responses'), function(key, val) {
+			window.clearInterval(Session.get('intervalHandle'));
 
+			var r = [];
+			$.each(Session.get('responses'), function(i, val) {
+				r.push(val === 'F' ? 'O' : val);
 			});
 
-			Meteor.call('insertTest', Session.get('studentId'), Session.get('testIndex'), Sessin)
+			Meteor.call('insertTest', Session.get('studentId'), Session.get('testIndex'), r, $('#comment').val(), function (err, res) {
+				if (err)
+					alert(err);
+
+				BlazeLayout.render('completed');
+			});
 		}
 
 		return '0:00';
@@ -111,7 +117,7 @@ function updateTime() {
 }
 
 function changeProblem(index) {
-	if (num < 0 || num > 11)
+	if (index < 0 || index > 11)
 			return;
 	
 	if (Session.get('mode') === 'test') {
@@ -125,13 +131,13 @@ function changeProblem(index) {
 	
 		$('input').prop('checked', false);
 	
-		Session.set('index', num);
+		Session.set('index', index);
 	
 		$('input').filter(function() {
   			return this.value === Session.get('responses')[Session.get('index')];
   		}).prop('checked', true);
   	} else {
-  		Session.set('index', num);
+  		Session.set('index', index);
   	}
 }
 
@@ -163,6 +169,7 @@ Template.app.events({
 			Session.set('responses', fillArray('F', 12));
 
 			updateTime();
+			Session.set('intervalHandle', window.setInterval(updateTime, 1000));
 		});
 	},
 
@@ -194,5 +201,3 @@ function fillArray(val, length) {
 }
 
 $(window).on('resize', changePadding);
-        
-setInterval(updateTime, 1000);

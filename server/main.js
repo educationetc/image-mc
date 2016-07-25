@@ -30,7 +30,7 @@ Meteor.methods({
       createdAt: Date.now()
     }, function (err, res) {
       Reflections.insert({
-        _id: res._id,
+        _id: res,
         reflection: reflection,
       });
     });

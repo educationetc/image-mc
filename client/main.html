@@ -31,18 +31,7 @@
     </nav>
   {{/if}}
     <div style="text-align: center">
-      {{#unless signedIn}}
-        <div class="container text-center">
-          <br><br><br><br><br>
-          <h1 style="font-size: 40px">Calculus Learning Tool</h1>
-          <br><br>
-          <div>
-            <input id="student-id" class="assessment-input" placeholder="Student ID">
-          </div>
-          <br>
-          <button id="student-id-submit" class="assessment-button" type="submit" style="margin-top: 10px">Begin</button>
-        </div>
-      {{else}}
+      {{#if signedIn}}
         <h2>Question {{question}}{{#unless isTestMode}} Solution{{/unless}}</h2>
         <img src="{{image}}">
         {{changePadding}}
@@ -62,7 +51,18 @@
             </div>
           </div>
         </nav>
-      {{/unless}}
+      {{else}}
+        <div class="container text-center">
+          <br><br><br><br><br>
+          <h1 style="font-size: 40px">Calculus Learning Tool</h1>
+          <br><br>
+          <div>
+            <input id="student-id" class="assessment-input" placeholder="Student ID">
+          </div>
+          <br>
+          <button id="student-id-submit" class="assessment-button" type="submit" style="margin-top: 10px">Begin</button>
+        </div>
+      {{/if}}
     </div>
 </template>
 
@@ -89,5 +89,12 @@
         <label for="comment">How did it go? What did you learn?</label>
         <textarea class="form-control" rows="5" id="comment"></textarea>
       </div>
+  </div>
+</template>
+
+<template name="completed">
+  <div class="container text-center">
+    <br><br><br><br><br>
+    <h1 style="font-size: 40px">Responses Submitted!</h1>
   </div>
 </template>
