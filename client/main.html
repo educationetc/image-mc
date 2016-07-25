@@ -1,0 +1,93 @@
+<head>
+  <title>Calculus Learning Tool</title>
+  <script src="https://use.fontawesome.com/6f22bd6abf.js"></script>
+</head>
+
+<template name="app">
+  {{#if signedIn}}
+    <nav id="navbar-top" class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-left">
+            {{#each length}}
+              <li>
+                <button id="{{add @index}}" style="outline:none;" class="tabs btn btn-{{correct @index}} btn-circle{{answered @index}}">{{add @index}}</button>
+              </li>
+            {{/each}}
+          </ul>
+          <div class="nav navbar-nav navbar-right">
+            <p class="navbar-text" id="timer">Time Remaining: {{time}}</p>
+          </div>
+        </div>
+      </div>
+    </nav>
+  {{/if}}
+    <div style="text-align: center">
+      {{#unless signedIn}}
+        <div class="container text-center">
+          <br><br><br><br><br>
+          <h1 style="font-size: 40px">Calculus Learning Tool</h1>
+          <br><br>
+          <div>
+            <input id="student-id" class="assessment-input" placeholder="Student ID">
+          </div>
+          <br>
+          <button id="student-id-submit" class="assessment-button" type="submit" style="margin-top: 10px">Begin</button>
+        </div>
+      {{else}}
+        <h2>Question {{question}}{{#unless isTestMode}} Solution{{/unless}}</h2>
+        <img src="{{image}}">
+        {{changePadding}}
+        <nav id="navbar-bottom" class="navbar navbar-default navbar-fixed-bottom">
+          <br>
+          <div class="container">
+            {{>Template.dynamic template=footer}}
+            <div class="nav navbar-nav navbar-right">
+              <div class="next-previous">
+                <button id="next" class="btn btn-primary"><i class="fa fa-angle-right" aria-hidden="true"></i></button>
+              </div>
+            </div>
+            <div class="nav navbar-nav navbar-left">
+              <div class="next-previous">
+                <button id="previous" class="btn btn-primary"><i class="fa fa-angle-left" aria-hidden="true"></i></button>
+              </div>
+            </div>
+          </div>
+        </nav>
+      {{/unless}}
+    </div>
+</template>
+
+<template name="test-footer">
+    <div class="nav navbar-nav navbar-center footer">
+      <input id="A" type="radio" name="mc" value="A"/> A
+      <input id="B" type="radio" name="mc" value="B"/> B
+      <input id="C" type="radio" name="mc" value="C"/> C
+      <input id="D" type="radio" name="mc" value="D"/> D
+      <input id="E" type="radio" name="mc" value="E"/> E
+      <br><br>
+      <span class="label label-default">This is a {{type}} question</span>
+      <span class="label label-info">Suggested Time: {{suggested}}</span>
+      <br><br>
+    </div>
+</template>
+
+<template name="check-footer">
+  <div class="nav navbar-nav navbar-center footer">
+      <span class="label label-default">Correct Answer: {{correct}}</span>
+      <span class="label label-{{#if equal correct response}}success{{else}}danger{{/if}}">Your Answer: {{response}}</span>
+      <br><br>
+      <div class="form-group">
+        <label for="comment">How did it go? What did you learn?</label>
+        <textarea class="form-control" rows="5" id="comment"></textarea>
+      </div>
+  </div>
+</template>
