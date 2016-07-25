@@ -14,12 +14,15 @@ Meteor.methods({
 	'getTest': function(studentId) {
 
 		if (!students[studentId])
-			return false;
+			throw new Meteor.Error('User not found.');
 
     var t = getTestIndex(studentId),
       b = buildTests(studentId);
 
-    return { questions: b.slice(12 * t, 12 * t + 12), testIndex: t };
+    if (t > 2)
+      throw new Meteor.Error('You have completed all of the problems.');
+
+    return { questions: b.slice(12 * t, 12 * t + 12), testIndex: t, name: students[studentId].name };
 	},
 
   'insertTest': function(studentId, testIndex, responses, reflection) {

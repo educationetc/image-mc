@@ -104,9 +104,9 @@ function updateTime() {
 
 			Meteor.call('insertTest', Session.get('studentId'), Session.get('testIndex'), r, $('#comment').val(), function (err, res) {
 				if (err)
-					alert(err);
+					return nofity(err.error, true);
 
-				BlazeLayout.render('completed');
+				notify('Responses Submitted!', false);
 			});
 		}
 
@@ -150,15 +150,12 @@ Template.app.events({
 		var id = $('#student-id').val();
 
 		if (!id)
-			return alert('Please enter a student-id.');
+			return notify('Please enter a student-id.', true);
 
 
 		Meteor.call('getTest', id, function(err, res) {
 			if (err)
-				return alert(err);
-
-			if (!res)
-				return alert('User not found.')
+				return notify(err.error, true);
 
 			Session.set('studentId', id);
 			Session.set('testIndex', res.testIndex);
@@ -198,6 +195,15 @@ function fillArray(val, length) {
 		a.push(val);
 
 	return a;
+}
+
+function notify(text, isError) {
+	$('#message').removeClass();
+	$('#message').addClass(isError ? 'error' : 'success');
+	$('#message').fadeIn(1000);
+	$('#message').text(text);
+
+	setTimeout(() => $('#message').fadeOut(1000), 2000);
 }
 
 $(window).on('resize', changePadding);
