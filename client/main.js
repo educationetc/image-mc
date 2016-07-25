@@ -91,7 +91,7 @@ Template['check-footer'].helpers({
 });
 
 function updateTime() {
-	var n = 1000 * 60 * (Session.get('mode') === 'test' ? 12 : 28) - Date.now() + Session.get('start-time');
+	var n = 1000 * 60 * (Session.get('mode') === 'test' ? 1 : 2) - Date.now() + Session.get('start-time');
 
 	if (n < 0) {
 		if (Session.get('mode') == 'test') {
