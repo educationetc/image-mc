@@ -205,12 +205,11 @@ function fillArray(val, length) {
 }
 
 function notify(text, isError) {
-	$('#message').removeClass();
-	$('#message').addClass(isError ? 'error' : 'success');
+	$('body').append('<div id="message" class="' + (isError ? 'error' : 'success') + '">' + text + '</div>');
 	$('#message').fadeIn(1000);
-	$('#message').text(text);
 
 	setTimeout(() => $('#message').fadeOut(1000), 2000);
+	setTimeout(() => $('#message').remove(), 3000);
 }
 
 function shakeInput() {
