@@ -24,7 +24,7 @@
             {{/each}}
           </ul>
           <div class="nav navbar-nav navbar-right">
-            <p class="navbar-text" id="timer">Time Remaining: {{time}}</p>
+            <p class="navbar-text" id="timer">{{#unless isDone}}Time Remaining: {{time}}{{else}}Responses Submitted{{/unless}}</p>
           </div>
         </div>
       </div>
@@ -32,7 +32,7 @@
   {{/if}}
     <div style="text-align: center">
       {{#if signedIn}}
-        <h2>Question {{question}}{{#unless isTestMode}} Solution{{/unless}}</h2>
+        <h2>Question {{question}}{{#unless isTest}} Solution{{/unless}}</h2>
         <img src="{{image}}">
         {{changePadding}}
         <nav id="navbar-bottom" class="navbar navbar-default navbar-fixed-bottom">
@@ -90,12 +90,5 @@
         <label for="comment">How did it go? What did you learn?</label>
         <textarea class="form-control" rows="5" id="comment"></textarea>
       </div>
-  </div>
-</template>
-
-<template name="completed">
-  <div class="container text-center">
-    <br><br><br><br><br>
-    <h1 style="font-size: 40px">Responses Submitted!</h1>
   </div>
 </template>

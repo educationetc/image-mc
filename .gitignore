@@ -1,2 +1,3 @@
 .DS_Store
+./private/students.json
 node_modules/

@@ -44,8 +44,12 @@ Template.app.helpers({
   	return Session.get('index') + 1;
   },
 
-  isTestMode() {
+  isTest() {
   	return Session.get('mode') === 'test';
+  },
+
+  isDone() {
+  	return Session.get('mode') === 'done';
   },
 
   footer() {
@@ -87,7 +91,7 @@ Template['check-footer'].helpers({
 });
 
 function updateTime() {
-	var n = 1000 * 60 * (Session.get('mode') === 'test' ? .1 : .1) - Date.now() + Session.get('start-time');
+	var n = 1000 * 60 * (Session.get('mode') === 'test' ? 12 : 28) - Date.now() + Session.get('start-time');
 
 	if (n < 0) {
 		if (Session.get('mode') == 'test') {
@@ -95,8 +99,6 @@ function updateTime() {
 			Session.set('start-time', Date.now());
 			Session.set('mode', 'check');
 		} else {
-			window.clearInterval(Session.get('intervalHandle'));
-
 			var r = [];
 			$.each(Session.get('responses'), function(i, val) {
 				r.push(val === 'F' ? 'O' : val);
@@ -105,9 +107,11 @@ function updateTime() {
 			Meteor.call('insertTest', Session.get('studentId'), Session.get('testIndex'), r, $('#comment').val(), function (err, res) {
 				if (err)
 					return nofity(err.error, true);
-
-				notify('Responses Submitted!', false);
 			});
+
+			window.clearInterval(Session.get('intervalHandle'));
+			Session.set('mode', 'done');
+			notify('Responses Submitted!', false);
 		}
 
 		return '0:00';
@@ -150,12 +154,13 @@ Template.app.events({
 		var id = $('#student-id').val();
 
 		if (!id)
-			return notify('Please enter a student-id.', true);
-
+			return shakeInput();
 
 		Meteor.call('getTest', id, function(err, res) {
-			if (err)
+			if (err) {
+				shakeInput();
 				return notify(err.error, true);
+			}
 
 			Session.set('studentId', id);
 			Session.set('testIndex', res.testIndex);
@@ -167,6 +172,8 @@ Template.app.events({
 
 			updateTime();
 			Session.set('intervalHandle', window.setInterval(updateTime, 1000));
+
+			notify('Welcome ' + res.name.split(', ')[1].split(' ')[0] + '!');
 		});
 	},
 
@@ -204,6 +211,17 @@ function notify(text, isError) {
 	$('#message').text(text);
 
 	setTimeout(() => $('#message').fadeOut(1000), 2000);
+}
+
+function shakeInput() {
+	var input = $('#student-id');
+	input.addClass('shake');
+	input.css('border', '3px solid red');
+
+	setTimeout(() => {
+		input.css('border', '3px solid #e6e6e6');
+		input.removeClass('shake')
+	}, 1000);
 }
 
 $(window).on('resize', changePadding);
