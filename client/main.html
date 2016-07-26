@@ -37,22 +37,9 @@
         <img style="max-width:100%" src="{{image}}">
         {{changePadding}}
         <nav id="navbar-bottom" class="navbar navbar-default navbar-fixed-bottom">
-          <br>
           <div class="container">
-            <div class="nav navbar-nav navbar-center footer">
-              {{>Template.dynamic template=footer}}
-              {{>credits}}
-            </div>
-            <div class="nav navbar-nav navbar-right">
-              <div class="next-previous">
-                <button id="next" class="btn btn-primary"><i class="fa fa-angle-right" aria-hidden="true"></i></button>
-              </div>
-            </div>
-            <div class="nav navbar-nav navbar-left">
-              <div class="next-previous">
-                <button id="previous" class="btn btn-primary"><i class="fa fa-angle-left" aria-hidden="true"></i></button>
-              </div>
-            </div>
+            {{>Template.dynamic template=footer}}
+            {{>credits}}
           </div>
         </nav>
       {{else}}
@@ -76,24 +63,35 @@
 </template>
 
 <template name="test-footer">
+  <button id="previous" type="button" class="btn btn-default next-previous" aria-label="Previous">
+    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+  </button>
   <input id="A" type="radio" name="mc" value="A"/> A
   <input id="B" type="radio" name="mc" value="B"/> B
   <input id="C" type="radio" name="mc" value="C"/> C
   <input id="D" type="radio" name="mc" value="D"/> D
   <input id="E" type="radio" name="mc" value="E"/> E
-  <br><br>
+  <button id="next" type="button" class="btn btn-default next-previous" aria-label="Next">
+    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+  </button>
+  <br>
   <span class="label label-default">This is a {{type}} question</span>
   <span class="label label-info">Suggested Time: {{suggested}}</span>
 </template>
 
 <template name="check-footer">
-  <span class="label label-default">Correct Answer: {{correct}}</span>
-  <span class="label label-{{#if equal correct response}}success{{else}}danger{{/if}}">Your Answer: {{response}}</span>
-  <br><br>
-  <div class="form-group">
+  <div class="reflection form-group">
     <label for="comment">How did it go? What did you learn?</label>
     <textarea class="form-control" rows="5" id="comment"></textarea>
   </div>
+  <button id="previous" type="button" class="btn btn-default next-previous" aria-label="Previous">
+    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+  </button>
+  <span class="label label-default">Correct Answer: {{correct}}</span>
+  <span class="label label-{{#if equal correct response}}success{{else}}danger{{/if}}">Your Answer: {{response}}</span>
+  <button id="next" type="button" class="btn btn-default next-previous" aria-label="Next">
+    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+  </button>
 </template>
 
 <template name="credits"><p class="text-muted" id="credits">&copy; Education Etc 2016. Designed by Ben Orgera</p></template>
