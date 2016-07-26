@@ -14,9 +14,9 @@
 
 .tabs {
 	margin-top: 10px;
-    margin-bottom: 10px;
-    margin-left: 1px;
-    margin-right: 1px;
+  margin-bottom: 10px;
+  margin-left: 1px;
+  margin-right: 1px;
 }
 
 .answered {
@@ -24,10 +24,16 @@
 }
 
 .next-previous {
-	margin-left: 3em;
-  margin-right: 3em;
   margin-top: 1em;
   margin-bottom: 1em;
+}
+
+#next {
+  margin-left: 3em;
+}
+
+#previous {
+  margin-right: 3em;
 }
 
 .reflection {
