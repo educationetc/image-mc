@@ -13,16 +13,32 @@ Meteor.startup(() => {
 Meteor.methods({
 	'getTest': function(studentId) {
 
+    if (studentId === '27182') {
+      var r = Responses.find({}, { sort: {studentId: -1} }),
+        arr = r ? r.fetch() : [],
+        res = [];
+
+      for (var i = 0; i < arr.length; i++) {
+        res.push({
+          studentId: arr[i].studentId,
+          name: students[arr[i].studentId].name,
+          responses: arr[i].responses,
+          reflection: Reflections.findOne({ _id: arr[i]._id }).reflection,
+          testIndex: arr[i].testIndex,
+          test: getTest(arr[i].studentId, arr[i].testIndex),
+          createdAt: arr[i].createdAt
+        });
+      }
+
+      return { mode: 'teacher', res: res };
+    }
+
 		if (!students[studentId])
 			throw new Meteor.Error('User not found.');
 
-    var t = getTestIndex(studentId),
-      b = buildTests(studentId);
+    var t = getTestIndex(studentId);
 
-    if (t > 2)
-      throw new Meteor.Error('You have completed all of the problems.');
-
-    return { questions: b.slice(12 * t, 12 * t + 12), testIndex: t, name: students[studentId].name };
+    return { questions: getTest(studentId, t), testIndex: t, name: students[studentId].name };
 	},
 
   'insertTest': function(studentId, testIndex, responses, reflection) {
@@ -71,7 +87,7 @@ function shuffle(arr, studentId) {
   return r;
 }
 
-function buildTests(studentId) {
+function getTests(studentId) {
   var c = shuffle(calc, studentId),
     nc = shuffle(nonCalc, studentId);
 
@@ -81,4 +97,13 @@ function buildTests(studentId) {
 function getTestIndex(studentId) {
   var r = Responses.find({ studentId: studentId });
   return r ? r.fetch().length : 0;
+}
+
+function getTest(studentId, index) {
+  if (index > 2)
+    throw new Meteor.Error('You have completed all of the problems.');
+
+  var j = getTests(studentId).slice(12 * index, 12 * index + 12);
+  console.log(j);
+  return j;
 }

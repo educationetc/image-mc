@@ -6,7 +6,6 @@ Router.route('/', function() {
 	BlazeLayout.render('app');
 });
 
-
 Template.app.helpers({
   add(num) {
   	return num + 1;
@@ -90,8 +89,62 @@ Template['check-footer'].helpers({
 	}
 });
 
+Template['teacher'].helpers({
+	from(time) {
+		if(time === 0)
+			return '';
+	
+		var t = Date.now() - time
+			, s = t / 1000
+			, str = '';
+	
+		if(s / 86400 > 1)
+			str = (~~(s/86400)) + ' days ago'
+		else if(s / 3600 > 1)
+			str = (~~(s / 3600)) + ' hours ago'
+		else if((s / 60) > 1)
+			str = (~~(s / 60)) + ' minutes ago'
+		else
+			str = ~~s + ' seconds ago'
+	
+		return str;
+	}, 
+
+	add(num) {
+		return num + 1;
+	},
+
+	active() {
+		return 2;
+	},
+
+	equal(a, b) {
+		return a === b;
+	},
+
+	studentIndex() {
+		return Session.get('studentIndex');
+	},
+
+	questionIndex() {
+		return Session.get('questionIndex');
+	},
+
+	getResponses(index) {
+		return Session.get('results')[index].responses;
+	},
+
+	answer(studentIndex, questionIndex) {
+		return Session.get('results')[studentIndex].test[questionIndex].a;
+	},
+
+	response(studentIndex, questionIndex) {
+		return Session.get('results')[studentIndex].responses[questionIndex];
+	}
+});
+
 function updateTime() {
-	var n = 1000 * 60 * (Session.get('mode') === 'test' ? 12 : 28) - Date.now() + Session.get('start-time');
+	var n = 1000 * 60 * (Session.get('mode') === 'test' ? .5 : .5) - Date.now() + Session.get('start-time');
 
 	if (n < 0) {
 		if (Session.get('mode') == 'test') {
@@ -162,6 +215,23 @@ Template.app.events({
 				return notify(err.error, true);
 			}
 
+			if (res.mode && res.mode === 'teacher') {
+				console.log(res.res);
+				for (var i = 0; i < res.res.length; i++) {
+					var correct = 0;
+					for (var j = 0; j < res.res[i].responses.length; j++)
+						if (res.res[i].responses[j] === res.res[i].test[j].a)
+							correct++;
+					res.res[i].score = correct + '/' + res.res[i].responses.length;
+				}
+
+				Session.set('questionIndex', 0);
+				Session.set('studentIndex', 0);
+ 				Session.set('results', res.res);
+ 				
+				return BlazeLayout.render('teacher', { res: res.res });
+			}
+
 			Session.set('studentId', id);
 			Session.set('testIndex', res.testIndex);
 			Session.set('mode', 'test');
@@ -183,6 +253,27 @@ Template.app.events({
 
 	'click #next': function(event, instance) {
 		changeProblem(Session.get('index') + 1);
+	}
+});
+
+Template.teacher.events({
+	'click tr': function(event, instance) {
+		Session.set('studentIndex', $(event.currentTarget).attr('name'));
+		$(event.currentTarget).addClass('active').siblings().removeClass('active');
+	},
+
+	'click .tabs': function(event, instance) {
+		Session.set('questionIndex', $(event.currentTarget).attr('id'));
+	},
+
+	'click #previous': function(event, instance) {
+		var current = Session.get('questionIndex');
+		Session.set('questionIndex', current > 0 ? current - 1 : 0);
+	},
+
+	'click #next': function(event, instance) {
+		var current = Session.get('questionIndex');
+		Session.set('questionIndex', current < 11 ? current + 1 : 11);
 	}
 });
 

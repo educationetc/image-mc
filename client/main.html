@@ -8,19 +8,11 @@
   {{#if signedIn}}
     <nav id="navbar-top" class="navbar navbar-default navbar-fixed-top">
       <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-        </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-left">
             {{#each length}}
               <li>
-                <button id="{{add @index}}" style="outline:none;" class="tabs btn btn-{{correct @index}} btn-circle{{answered @index}}">{{add @index}}</button>
+                <button id="{{@index}}" style="outline:none;" class="tabs btn btn-{{correct @index}} btn-circle{{answered @index}}">{{add @index}}</button>
               </li>
             {{/each}}
           </ul>
@@ -31,7 +23,7 @@
       </div>
     </nav>
   {{/if}}
-    <div style="text-align: center">
+    <div style="text-align:center">
       {{#if signedIn}}
         <h2>Question {{question}}{{#unless isTest}} Solution{{/unless}}</h2>
         <img style="max-width:100%" src="{{image}}">
@@ -54,9 +46,7 @@
           <button id="student-id-submit" class="assessment-button" type="submit" style="margin-top: 10px">Begin</button>
         </div>
         <nav class="navbar navbar-default navbar-fixed-bottom">
-          <div class="container">
             {{>credits}}
-          </div>
         </nav>
       {{/if}}
     </div>
@@ -95,3 +85,49 @@
 </template>
 
 <template name="credits"><p class="text-muted" id="credits">&copy; Education Etc 2016. Designed by Ben Orgera</p></template>
+
+
+<template name="teacher">
+  <table class="table table-striped" id="results">
+    <thead>
+      <th>Name</th>
+      <th>Student ID</th>
+      <th>Test Number</th>
+      <th>Score</th>
+      <th>Taken</th>
+    </thead>
+    <tbody>
+      {{#each res}}
+        <tr name="{{@index}}">
+          <td>{{ this.name }}</td>
+          <td>{{ this.studentId }}</td>
+          <td>{{ add this.testIndex }}</td>
+          <td>{{ this.score }}</td>
+          <td>{{ from this.createdAt }}</td>
+        </tr>
+      {{/each}}
+    </tbody>
+    </table>
+    <nav class="navbar navbar-default navbar-fixed-bottom">
+      <div class="container" style="text-align:center">
+        <button id="previous" type="button" class="btn btn-default next-previous" aria-label="Previous">
+          <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+        </button>
+        <span class="label label-default">Correct Answer: {{answer studentIndex questionIndex}}</span>
+        <span class="label label-success">Their Answer: {{response studentIndex questionIndex}}</span>
+        <button id="next" type="button" class="btn btn-default next-previous" aria-label="Next">
+          <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="container" style="text-align:center">
+        <ul style="padding:0">
+          {{#each getResponses studentIndex}}
+          <li class="teacher-tabs">
+            <button id="{{@index}}" style="outline:none;" class="tabs btn btn-{{#if equal this (answer studentIndex @index) }}success{{else}}danger{{/if}} btn-circle{{#if equal @index questionIndex}} active-button{{/if}}">{{add  @index}}</button>
+          </li>
+          {{/each}}
+        </ul>
+        {{>credits}}
+      </div>
+    </nav>
+</template>
