@@ -61,6 +61,10 @@ Template.app.helpers({
 
   changePadding() {
   	changePadding();
+  },
+
+  active(index) {
+  	return Session.get('index') === index;
   }
 });
 
@@ -119,15 +123,17 @@ Template['teacher'].helpers({
 	},
 
 	equal(a, b) {
+		// if ((String(a) === String(b)) !== (a === b))
+		// 	console.log('WHAAA');
 		return a === b;
 	},
 
 	studentIndex() {
-		return Session.get('studentIndex');
+		return parseInt(Session.get('studentIndex'));
 	},
 
 	questionIndex() {
-		return Session.get('questionIndex');
+		return parseInt(Session.get('questionIndex'));
 	},
 
 	getResponses(index) {
@@ -140,6 +146,27 @@ Template['teacher'].helpers({
 
 	response(studentIndex, questionIndex) {
 		return Session.get('results')[studentIndex].responses[questionIndex];
+	},
+
+	results() {
+		return Session.get('results');
+	},
+
+	firstName(studentIndex) {
+		return Session.get('results')[studentIndex].name.split(', ')[1].split(' ')[0];
+	},
+
+	reflection(studentIndex) {
+		return Session.get('results')[studentIndex].reflection;
+	},
+
+	image(studentIndex, questionIndex, mode) {
+		return (questionIndex < 8 ? 'non-calc/' : 'calc/') + Session.get('results')[studentIndex].test[questionIndex].q + (mode === 'solution' ? 's' : '') + '.png';
+	},
+
+	mode() {
+		console.log(Session.get('mode'));
+		return Session.get('mode');
 	}
 });
 
@@ -216,7 +243,6 @@ Template.app.events({
 			}
 
 			if (res.mode && res.mode === 'teacher') {
-				console.log(res.res);
 				for (var i = 0; i < res.res.length; i++) {
 					var correct = 0;
 					for (var j = 0; j < res.res[i].responses.length; j++)
@@ -225,6 +251,7 @@ Template.app.events({
 					res.res[i].score = correct + '/' + res.res[i].responses.length;
 				}
 
+				Session.set('mode', 'question');
 				Session.set('questionIndex', 0);
 				Session.set('studentIndex', 0);
  				Session.set('results', res.res);
@@ -259,7 +286,6 @@ Template.app.events({
 Template.teacher.events({
 	'click tr': function(event, instance) {
 		Session.set('studentIndex', $(event.currentTarget).attr('name'));
-		$(event.currentTarget).addClass('active').siblings().removeClass('active');
 	},
 
 	'click .tabs': function(event, instance) {
@@ -274,6 +300,14 @@ Template.teacher.events({
 	'click #next': function(event, instance) {
 		var current = Session.get('questionIndex');
 		Session.set('questionIndex', current < 11 ? current + 1 : 11);
+	},
+
+	'click #question-mode': function (event, instance) {
+		Session.set('mode', 'question');
+	},
+
+	'click #solution-mode': function (event, instance) {
+		Session.set('mode', 'solution');
 	}
 });
 

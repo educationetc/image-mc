@@ -7,6 +7,14 @@
   font-size: 12px;
   line-height: 1.428571429;
   border-radius: 15px;
+  border-width:0;
+}
+
+.btn-circle:hover, .btn-circle:focus {
+  border-radius: 17px;
+  width: 34px;
+  height: 34px;
+  border-width: 0;
 }
 
 @media screen and (max-width: 600px) {
@@ -101,6 +109,7 @@
 #credits {
   font-size: .7em;
   margin: 1.5em;
+  text-align: center !important;
 }
 
 .shake {
@@ -148,10 +157,21 @@
   background-color: lightblue !important;
 }
 
+.active-button {
+  border-radius: 17px;
+  border-color: lightblue !important;
+  width: 34px;
+  height: 34px;
+  border-width: 3px !important;
+}
+
 .teacher-tabs {
   display: inline;
-  float: center;
   list-style-type: none;
-  padding: none;
-  margin: none;
+  padding: 0;
+  margin: 0;
+}
+
+.inline {
+  display: inline-flex !important;
 }
