@@ -1,7 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { Responses } from '../mongo/responses.js';
 import { Reflections } from '../mongo/reflections.js';
-import { Grades } from '../mongo/grades.js';
 
 var nonCalc = [{q:0,a:'A'},{q:1,a:'B'},{q:2,a:'C'},{q:3,a:'D'},{q:4,a:'E'},{q:5,a:'A'},{q:6,a:'B'},{q:7,a:'C'},{q:8,a:'A'},{q:9,a:'B'},{q:10,a:'C'},{q:11,a:'D'},{q:12,a:'E'},{q:13,a:'A'},{q:14,a:'B'},{q:15,a:'C'},{q:16,a:'A'},{q:17,a:'B'},{q:18,a:'C'},{q:19,a:'D'},{q:20,a:'E'},{q:21,a:'A'},{q:22,a:'B'},{q:23,a:'C'}],
   calc = [{q:24,a:'A'},{q:25,a:'B'},{q:26,a:'C'},{q:27,a:'D'},{q:28,a:'A'},{q:29,a:'B'},{q:30,a:'C'},{q:31,a:'D'},{q:32,a:'A'},{q:33,a:'B'},{q:34,a:'C'},{q:35,a:'D'}],
