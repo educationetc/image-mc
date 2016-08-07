@@ -94,6 +94,7 @@
       <th>Test Number</th>
       <th>Score</th>
       <th>Taken</th>
+      <th>Grade</th>
     </thead>
     <tbody>
       {{#each results}}
@@ -103,6 +104,13 @@
           <td>{{ add this.testIndex }}</td>
           <td>{{ this.score }}</td>
           <td>{{ from this.createdAt }}</td>
+          <td>
+            <div class="btn-group">
+              <button type="button" class="btn btn-default grade{{#if equal (grade @index) 70}} active{{/if}}" name="{{@index}} 70">&#10003;-</button>
+              <button type="button" class="btn btn-default grade{{#if equal (grade @index) 85}} active{{/if}}" name="{{@index}} 85">&#10003;</button>
+              <button type="button" class="btn btn-default grade{{#if equal (grade @index) 100}} active{{/if}}" name="{{@index}} 100">&#10003;+</button>
+            </div>  
+          </td>
         </tr>
       {{/each}}
     </tbody>

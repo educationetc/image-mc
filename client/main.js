@@ -103,7 +103,7 @@ Template['teacher'].helpers({
 			, str = '';
 	
 		if(s / 86400 > 1)
-			str = (~~(s/86400)) + ' days ago'
+			str = (~~(s / 86400)) + ' days ago'
 		else if(s / 3600 > 1)
 			str = (~~(s / 3600)) + ' hours ago'
 		else if((s / 60) > 1)
@@ -123,8 +123,6 @@ Template['teacher'].helpers({
 	},
 
 	equal(a, b) {
-		// if ((String(a) === String(b)) !== (a === b))
-		// 	console.log('WHAAA');
 		return a === b;
 	},
 
@@ -145,7 +143,8 @@ Template['teacher'].helpers({
 	},
 
 	response(studentIndex, questionIndex) {
-		return Session.get('results')[studentIndex].responses[questionIndex];
+		var r = Session.get('results')[studentIndex].responses[questionIndex];
+		return r === 'O' ? 'Omitted' : r;
 	},
 
 	results() {
@@ -165,8 +164,11 @@ Template['teacher'].helpers({
 	},
 
 	mode() {
-		console.log(Session.get('mode'));
 		return Session.get('mode');
+	},
+
+	grade(index) {
+		return Session.get('results')[index].grade;
 	}
 });
 
@@ -285,6 +287,7 @@ Template.app.events({
 
 Template.teacher.events({
 	'click tr': function(event, instance) {
+		Session.set('questionIndex', 0);
 		Session.set('studentIndex', $(event.currentTarget).attr('name'));
 	},
 
@@ -302,12 +305,21 @@ Template.teacher.events({
 		Session.set('questionIndex', current < 11 ? current + 1 : 11);
 	},
 
-	'click #question-mode': function (event, instance) {
+	'click #question-mode': function(event, instance) {
 		Session.set('mode', 'question');
 	},
 
-	'click #solution-mode': function (event, instance) {
+	'click #solution-mode': function(event, instance) {
 		Session.set('mode', 'solution');
+	},
+
+	'click .grade': function(event, instance) {
+		var arr = $(event.currentTarget).attr('name').split(' '),
+			r = Session.get('results');
+
+		r[arr[0]].grade = parseInt(arr[1]);
+		Session.set('results', r);
+		Meteor.call('updateGrade', Session.get('results')[arr[0]]._id, parseInt(arr[1]));
 	}
 });
 

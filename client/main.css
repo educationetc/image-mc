@@ -175,3 +175,7 @@
 .inline {
   display: inline-flex !important;
 }
+
+.grade {
+  font-size: .5em;
+}
