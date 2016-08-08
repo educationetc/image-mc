@@ -47,7 +47,7 @@ Meteor.methods({
       studentId: studentId,
       testIndex: testIndex,
       responses: responses,
-      grade: 0,
+      grade: -1,
       createdAt: Date.now()
     }, function (err, res) {
       Reflections.insert({

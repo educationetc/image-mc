@@ -44,7 +44,7 @@
           <br>
           <button id="student-id-submit" class="assessment-button" type="submit" style="margin-top: 10px">Begin</button>
         </div>
-        <nav class="navbar navbar-default navbar-fixed-bottom">
+        <nav class="navbar navbar-default navbar-fixed-bottom" style="min-height:0">
             {{>credits}}
         </nav>
       {{/if}}
@@ -87,39 +87,42 @@
 
 
 <template name="teacher">
-  <table class="table table-striped" id="results">
-    <thead>
-      <th>Name</th>
-      <th>Student ID</th>
-      <th>Test Number</th>
-      <th>Score</th>
-      <th>Taken</th>
-      <th>Grade</th>
-    </thead>
-    <tbody>
-      {{#each results}}
-        <tr name="{{@index}}" class="tr-click{{#if equal @index studentIndex}} active{{/if}}">
-          <td>{{ this.name }}</td>
-          <td>{{ this.studentId }}</td>
-          <td>{{ add this.testIndex }}</td>
-          <td>{{ this.score }}</td>
-          <td>{{ from this.createdAt }}</td>
-          <td>
-            <div class="btn-group">
-              <button type="button" class="btn btn-default grade{{#if equal (grade @index) 70}} active{{/if}}" name="{{@index}} 70">&#10003;-</button>
-              <button type="button" class="btn btn-default grade{{#if equal (grade @index) 85}} active{{/if}}" name="{{@index}} 85">&#10003;</button>
-              <button type="button" class="btn btn-default grade{{#if equal (grade @index) 100}} active{{/if}}" name="{{@index}} 100">&#10003;+</button>
-            </div>  
-          </td>
+  <div id="table-scroll" style="overflow:auto">
+    <table class="table table-striped" id="results">
+      <thead>
+        <th>Name</th>
+        <th>Student ID</th>
+        <th>Test Number</th>
+        <th>Score</th>
+        <th>Taken</th>
+        <th>Grade</th>
+      </thead>
+      <tbody>
+        {{#each results}}
+          <tr name="{{@index}}" class="tr-click{{#if equal @index studentIndex}} active{{/if}}">
+            <td>{{ this.name }}</td>
+            <td>{{ this.studentId }}</td>
+            <td>{{ add this.testIndex }}</td>
+            <td>{{ this.score }}</td>
+            <td>{{ from this.createdAt }}</td>
+            <td>
+              <div class="btn-group">
+                <button type="button" class="btn btn-default grade{{#if equal (grade @index) 0}} active{{/if}}" name="{{@index}} 0">0</button>
+                <button type="button" class="btn btn-default grade{{#if equal (grade @index) 70}} active{{/if}}" name="{{@index}} 70">&#10003;-</button>
+                <button type="button" class="btn btn-default grade{{#if equal (grade @index) 85}} active{{/if}}" name="{{@index}} 85">&#10003;</button>
+                <button type="button" class="btn btn-default grade{{#if equal (grade @index) 100}} active{{/if}}" name="{{@index}} 100">&#10003;+</button>
+              </div>  
+            </td>
+          </tr>
+        {{/each}}
+        <tr>
+          <td></td><td></td><td></td><td></td><td></td>
+          <td><button id="csv" class="btn btn-primary">Download CSV</button></td>
         </tr>
-      {{/each}}
-      <tr>
-        <td></td><td></td><td></td><td></td><td></td>
-        <td><button id="csv" class="btn btn-primary">Download CSV</button></td>
-      </tr>
-    </tbody>
+      </tbody>
     </table>
-    <nav class="navbar navbar-default navbar-fixed-bottom">
+  </div>
+    <nav id="teacher-nav" class="navbar navbar-default navbar-fixed-bottom" style="min-height:0">
       <div class="inline">
         <div class="container" style="text-align:center;float:left;width:50% !important;">
           <div class="container" style="text-align:center; float:left;width:100% !important;">
@@ -128,7 +131,7 @@
                 <h3 class="panel-title">{{firstName studentIndex}}'s Reflection</h3>
               </div>
               <div class="panel-body" style="max-height:10em">
-                <div style="max-height:7.5em;overflow:auto">{{reflection studentIndex}}</div>
+                <div style="height:7.5em;overflow:auto">{{reflection studentIndex}}</div>
               </div>
             </div>
           </div>
@@ -158,8 +161,8 @@
           </div>
           <div class="container" style="text-align:center; float:left;width:100% !important;">
             <div class="btn-group">
-              <button type="button" class="btn btn-default{{#if equal mode 'question'}} active{{/if}}" id="question-mode">Questions</button>
-              <button type="button" class="btn btn-default{{#if equal mode 'solution'}} active{{/if}}" id="solution-mode">Solutions</button>
+              <button type="button" class="btn btn-default{{#if equal mode 'question'}} active{{/if}}" id="question-mode">Question</button>
+              <button type="button" class="btn btn-default{{#if equal mode 'solution'}} active{{/if}}" id="solution-mode">Solution</button>
             </div>
           </div>
         </div>

@@ -332,20 +332,19 @@ Template.teacher.events({
 	'click .grade': function(event, instance) {
 		var arr = $(event.currentTarget).attr('name').split(' '),
 			r = Session.get('results');
-
+			
 		r[arr[0]].grade = parseInt(arr[1]);
 		Session.set('results', r);
 		Meteor.call('updateGrade', Session.get('results')[arr[0]]._id, parseInt(arr[1]));
 	},
 
 	'click #csv': function(event, instance) {
-		console.log('here');
 		var r = Session.get('results'),
 			s = '',
 			element = document.createElement('a');
 
 		for (var i = 0; i < r.length; i++)
-			s += (r[i].studentId + ',' + (r[i].grade === 0 ? 'N/A' : r[i].grade) + '\n');
+			s += (r[i].studentId + ',' + (r[i].grade === -1 ? 'N/A' : r[i].grade) + '\n');
 
   		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(s));
   		element.setAttribute('download', 'grades.csv');
@@ -354,6 +353,22 @@ Template.teacher.events({
   		element.click();
   		document.body.removeChild(element);
 	}
+});
+
+Template.teacher.onRendered(function () {
+	setTimeout(function () {
+		$(resize());
+	}, 0);
+});
+
+function resize() {
+	var size = ($(window).height() - $('#teacher-nav').height()) + 'px';
+	$('#table-scroll').css('max-height', size);
+}
+
+$(window).resize(function () {
+	console.log('window resize');
+	resize();
 });
 
 function changePadding() {
