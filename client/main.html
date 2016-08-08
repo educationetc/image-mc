@@ -98,7 +98,7 @@
     </thead>
     <tbody>
       {{#each results}}
-        <tr name="{{@index}}" class="{{#if equal @index studentIndex}}active{{/if}}">
+        <tr name="{{@index}}" class="tr-click{{#if equal @index studentIndex}} active{{/if}}">
           <td>{{ this.name }}</td>
           <td>{{ this.studentId }}</td>
           <td>{{ add this.testIndex }}</td>
@@ -113,6 +113,10 @@
           </td>
         </tr>
       {{/each}}
+      <tr>
+        <td></td><td></td><td></td><td></td><td></td>
+        <td><button id="csv" class="btn btn-primary">Download CSV</button></td>
+      </tr>
     </tbody>
     </table>
     <nav class="navbar navbar-default navbar-fixed-bottom">
@@ -133,7 +137,7 @@
               <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
             </button>
             <span class="label label-default">Correct Answer: {{answer studentIndex questionIndex}}</span>
-            <span class="label label-success">Their Answer: {{response studentIndex questionIndex}}</span>
+            <span class="label label-success">{{firstName studentIndex}}'s Answer: {{response studentIndex questionIndex}}</span>
             <button id="next" type="button" class="btn btn-default next-previous" aria-label="Next">
               <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
             </button>

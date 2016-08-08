@@ -68,6 +68,10 @@ Meteor.methods({
         }
       }
     );
+  },
+
+  'writeCSV': function() {
+    
   }
 });
 

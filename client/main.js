@@ -169,6 +169,22 @@ Template['teacher'].helpers({
 
 	grade(index) {
 		return Session.get('results')[index].grade;
+	},
+
+	csv() {
+		var r = Session.get('results'),
+			s = '',
+			element = document.createElement('a');
+
+		for (var i = 0; i < r.length; i++)
+			s += (r[i].studentId + ',' + (r[i].grade === 0 ? 'N/A' : r[i].grade) + '\n');
+
+  		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(s));
+  		element.setAttribute('download', 'grades.csv');
+  		element.style.display = 'none';
+  		document.body.appendChild(element);
+  		element.click();
+  		document.body.removeChild(element);
 	}
 });
 
@@ -286,7 +302,7 @@ Template.app.events({
 });
 
 Template.teacher.events({
-	'click tr': function(event, instance) {
+	'click .tr-click': function(event, instance) {
 		Session.set('questionIndex', 0);
 		Session.set('studentIndex', $(event.currentTarget).attr('name'));
 	},
@@ -320,6 +336,23 @@ Template.teacher.events({
 		r[arr[0]].grade = parseInt(arr[1]);
 		Session.set('results', r);
 		Meteor.call('updateGrade', Session.get('results')[arr[0]]._id, parseInt(arr[1]));
+	},
+
+	'click #csv': function(event, instance) {
+		console.log('here');
+		var r = Session.get('results'),
+			s = '',
+			element = document.createElement('a');
+
+		for (var i = 0; i < r.length; i++)
+			s += (r[i].studentId + ',' + (r[i].grade === 0 ? 'N/A' : r[i].grade) + '\n');
+
+  		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(s));
+  		element.setAttribute('download', 'grades.csv');
+  		element.style.display = 'none';
+  		document.body.appendChild(element);
+  		element.click();
+  		document.body.removeChild(element);
 	}
 });
 
