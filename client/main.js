@@ -350,7 +350,12 @@ Template.teacher.events({
 	},
 
 	'click #sheets': function(event, instance) {
-		Meteor.call('updateSheet', buildCSV());
+		Meteor.call('updateSheet', buildCSV(), function(err, res) {
+			if (err)
+				return nofity(err.error, true);
+
+			notify('Google Spreadsheet updated!', false);
+		});
 	}
 });
 
