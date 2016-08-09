@@ -70,8 +70,14 @@ Meteor.methods({
     );
   },
 
-  'writeCSV': function() {
-    
+  'updateSheet': function(data) {
+    HTTP.call( 'GET', 'https://script.google.com/macros/s/AKfycbyO4OdShuBK_Vrb2RBEU692WBd0hSBtZfYBJ79Iu7BP7o3PXyc/exec?data=' + data, {}, function( error, response ) {
+      if ( error ) {
+        console.log( error );
+      } else {
+        console.log( response );
+      }
+    });
   }
 });
 

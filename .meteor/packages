@@ -22,3 +22,7 @@ iron:router
 twbs:bootstrap
 kadira:blaze-layout
 session@1.1.6
+
+
+npm-container
+http

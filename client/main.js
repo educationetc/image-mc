@@ -332,26 +332,25 @@ Template.teacher.events({
 	'click .grade': function(event, instance) {
 		var arr = $(event.currentTarget).attr('name').split(' '),
 			r = Session.get('results');
-			
+
 		r[arr[0]].grade = parseInt(arr[1]);
 		Session.set('results', r);
 		Meteor.call('updateGrade', Session.get('results')[arr[0]]._id, parseInt(arr[1]));
 	},
 
 	'click #csv': function(event, instance) {
-		var r = Session.get('results'),
-			s = '',
-			element = document.createElement('a');
+		var element = document.createElement('a');
 
-		for (var i = 0; i < r.length; i++)
-			s += (r[i].studentId + ',' + (r[i].grade === -1 ? 'N/A' : r[i].grade) + '\n');
-
-  		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(s));
+  		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + buildCSV());
   		element.setAttribute('download', 'grades.csv');
   		element.style.display = 'none';
   		document.body.appendChild(element);
   		element.click();
   		document.body.removeChild(element);
+	},
+
+	'click #sheets': function(event, instance) {
+		Meteor.call('updateSheet', buildCSV());
 	}
 });
 
@@ -360,6 +359,14 @@ Template.teacher.onRendered(function () {
 		$(resize());
 	}, 0);
 });
+
+function buildCSV() {
+	var r = Session.get('results'),
+		s = '';
+	for (var i = 0; i < r.length; i++)
+			s += (r[i].studentId + ',' + (r[i].grade === -1 ? 'N/A' : r[i].grade) + '\n');
+	return encodeURIComponent(s);
+}
 
 function resize() {
 	var size = ($(window).height() - $('#teacher-nav').height()) + 'px';

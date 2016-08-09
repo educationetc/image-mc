@@ -1,10 +1,19 @@
 {
-  "name": "test-and-check",
-  "private": true,
+  "name": "image-mc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "start": "meteor run"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "dependencies": {
-    "meteor-node-stubs": "~0.2.0"
-  }
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/educationetc/image-mc.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/educationetc/image-mc/issues"
+  },
+  "homepage": "https://github.com/educationetc/image-mc#readme"
 }
