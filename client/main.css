@@ -179,3 +179,7 @@
 .grade {
   font-size: .5em;
 }
+
+th{
+  padding: 8px;
+}

@@ -243,6 +243,13 @@ function changeProblem(index) {
   	}
 }
 
+$(document).ready(function(){
+    $('#student-id').keypress(function(e){
+      if(e.keyCode==13)
+      $('#student-id-submit').click();
+    });
+});
+
 Template.app.events({
 	'click .tabs': function(event, instance) {
 		changeProblem(event.target.textContent - 1);
