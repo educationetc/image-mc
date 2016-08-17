@@ -2,99 +2,216 @@ import { Template } from 'meteor/templating';
 import { ReactiveVar } from 'meteor/reactive-var';
 import './main.html';
 
-Router.route('/', function() {
-	BlazeLayout.render('app');
+/**
+* Render the login page when first routed anywhere
+*/
+Router.route('/:anything(.*)', function() {
+	BlazeLayout.render('login');
 });
 
-Template.app.helpers({
-  add(num) {
-  	return num + 1;
-  },
+/*
+* ======================================= Student Template ==============================================
+*/
 
-  signedIn() {
-  	return Session.get('questions') ? true : false;
-  },
-
-  image() {
-  	return (Session.get('index') < 8 ? 'non-calc/' : 'calc/') + Session.get('questions')[(parseInt(Session.get('index')))].q + (Session.get('mode') === 'check' ? 's' : '') + '.png';
-  },
-
-  length() {
-  	if (!Session.get('questions'))
-  		return 0;
-
-  	var res = [];
-
-  	for (var i = 0; i < 12; i++)
-  		res.push('');
-
-  	return res;
-  },
-
-  time() {
-  	return Session.get('time');
-  },
-
-  answered(index) {
-  	return Session.get('responses')[index] !== 'F' && Session.get('mode') === 'test' ? ' answered' : '';
-  },
-
-  question() {
-  	return Session.get('index') + 1;
-  },
-
-  isTest() {
-  	return Session.get('mode') === 'test';
-  },
-
-  isDone() {
-  	return Session.get('mode') === 'done';
-  },
-
-  footer() {
-  	return Session.get('mode') + '-footer';
-  },
-
-  correct(index) {
-  	return Session.get('mode') === 'test' ? 'default' : (Session.get('questions')[index].a === Session.get('responses')[index] ? 'success' : 'danger');
-  },
-
-  resizeStudent() {
-  	resizeStudent();
-  },
-
-  active(index) {
-  	return Session.get('index') === index;
-  }
-});
-
-Template['test-footer'].helpers({
-  type() {
-  	return Session.get('index') < 8 ? 'non-calculator' : 'calculator';
-  },
-
-  suggested() {
-  	return (Session.get('index') < 8 ? '2' : '3') + ' minutes';
-  }
-});
-
-Template['check-footer'].helpers({
-	correct() {
-		return Session.get('questions')[Session.get('index')].a;
+Template.student.helpers({
+	/**
+	* @return {String} the URL of the image corresponding to the current question
+	*/
+	image() {
+		return (Session.get('questionIndex') < 8 ? 'non-calc/' : 'calc/') + Session.get('questions')[(parseInt(Session.get('questionIndex')))].q + (Session.get('mode') === 'check' ? 's' : '') + '.png';
 	},
 
-	response() {
-		var r = Session.get('responses')[Session.get('index')];
-		return r === 'F' ? 'Omitted' : r;
+	/**
+	* Create an array of empty values for handlebars to iterate through while rendering the nav buttons
+	* @return {Array} the array
+	*/
+	length() {
+		if (!Session.get('questions'))
+			return 0;
+
+		return fillArray('', 12);
 	},
 
-	equal(a, b) {
-		return a === b;
+	/**
+	* @return {String} the remaining time in the current mode (formatted as '0:00')
+	*/
+	time() {
+		return Session.get('time');
+	},
+
+	/**
+	* @return {Integer} the question number (not index)
+	*/
+	question() {
+		return Session.get('questionIndex') + 1;
+	},
+
+	/**
+	* @return {Boolean} a boolean representation of whether the mode is 'test'
+	*/
+	isTest() {
+		return Session.get('mode') === 'test';
+	},
+
+	/**
+	* @return {Boolean} a boolean representation of whether the mode is 'done'
+	*/
+	isDone() {
+		return Session.get('mode') === 'done';
+	},
+
+	/**
+	* Dynamic footer helper
+	* @return {String} the template name of the footer to be rendered
+	*/
+	footer() {
+		return Session.get('mode') + '-footer';
+	},
+
+	/**
+	* Get the css class which a certain questionIndex's nav button should be styled with
+	* @param {Integer} the questionIndex
+	* @return {String} the css class ('default' for an omitted response, 'success' for a correct response, and 'danger' for an incorrect response)
+	*/
+	buttonClass(questionIndex) {
+		return Session.get('mode') === 'test' ? 'default' : (Session.get('questions')[questionIndex].a === Session.get('responses')[questionIndex] ? 'success' : 'danger');
+	},
+
+	/**
+	* Get the css class which a certain questionIndex's nav button should be styled with
+	* @param {Integer} the questionIndex
+	* @return {String} the css class ('answered' is the question was answered, '' is omitted)
+	*/
+	buttonClassTwo(questionIndex) {
+		return Session.get('responses')[questionIndex] !== 'O' && Session.get('mode') === 'test' ? ' answered' : '';
+	},
+
+	/**
+	* A means of calling the resizeStudent listener each time the HTML is rendered (because this call is in the HTML)
+	* This may not be neccesary
+	*/
+	resizeStudent() {
+		resizeStudent();
+	},
+
+	/**
+	* Check if a given questionIndex is the current questionIndex
+	* @param {Integer} the questionIndex
+	* @return {Boolean} a boolean representation of whether the questionIndex is the current questionIndex
+	*/
+	active(questionIndex) {
+		return Session.get('questionIndex') === questionIndex;
 	}
 });
 
+Template.student.events({
+	/**
+	* Goto a different question using the nav buttons
+	*/
+	'click .tabs': function(event, instance) {
+		changeQuestion(event.target.textContent - 1);
+	},
+
+	/**
+	* Goto the previous question
+	*/
+	'click #previous': function(event, instance) {
+		changeQuestion(Session.get('questionIndex') - 1);
+	},
+
+	/**
+	* Goto the next question
+	*/
+	'click #next': function(event, instance) {
+		changeQuestion(Session.get('questionIndex') + 1);
+	}
+});
+
+/**
+* Intialize and call the resize listener
+*/
+Template.student.onRendered(function () {
+	$(window).resize(resizeStudent);
+	$(resizeStudent);
+});
+
+/**
+* Function to be called on the resize of the student view
+* Pads the question/solution images according to the window size
+*/
+function resizeStudent() {
+	console.log('resize student');
+	var t = $('#navbar-top').height(),
+		b = $('#navbar-bottom').height();
+
+	$(document.body).css({
+		'padding-top': (t ? (t + 'px') : '0px'),
+		'padding-bottom': (b ? (b + 'px') : '0px')
+	});
+}
+
+/**
+* Update the time displayed, and handle the countdown reaching 0
+*/
+function updateTime() {
+	var n = 1000 * 60 * (Session.get('mode') === 'test' ? .5 : .5) - Date.now() + Session.get('start-time');
+
+	//time ran out
+	if (n < 0) {
+		if (Session.get('mode') == 'test') { //test mode
+			changeQuestion(0);
+			Session.set('start-time', Date.now());
+			Session.set('mode', 'check');
+		} else { //question mode
+			//query the server to insert the new result
+			Meteor.call('insertResult', Session.get('studentId'), Session.get('testIndex'), Session.get('responses'), $('#comment').val(), function (err, res) {
+				if (err)
+					return nofity(err.error, true);
+			});
+
+			window.clearInterval(Session.get('intervalHandle')); //stop the countdown
+			Session.set('mode', 'done');
+			notify('Responses Submitted!', false);
+		}
+
+		return Session.set('time', '0:00');
+	}
+
+  	Session.set('time', parseInt(n / 1000 / 60) + ':' + ('0' + parseInt(n / 1000 % 60)).slice(-2)); //build the time string
+}
+
+/**
+* Change the question being displayed
+* @param {Integer} the questionIndex to change to
+*/
+function changeQuestion(questionIndex) {
+	//return if they're trying to change to an invalid questionIndex
+	if (questionIndex < 0 || questionIndex > 11)
+		return;
+
+	if (Session.get('mode') === 'test') {
+		$('input').prop('checked', false); //uncheck all of the multiple choice radio buttons
+
+		//check the radio button corresponding to their response at questionIndex (if they have responded to the question at questionIndex)
+		$('input').filter(function() {
+  			return this.value === Session.get('responses')[questionIndex];
+  		}).prop('checked', true);
+  	}
+
+  	Session.set('questionIndex', questionIndex);
+}
+
+/*
+* ======================================= Teacher Template ==============================================
+*/
+
 Template['teacher'].helpers({
-	from(time) {
+	/**
+	* Get the elapsed time since a given time
+	* @param {Integer} a millisecond representation of the time
+	* @return {String} a string representation of the elapsed time
+	*/
+	when(time) {
 		if(time === 0)
 			return '';
 	
@@ -114,248 +231,175 @@ Template['teacher'].helpers({
 			str = ~~s + ' seconds ago'
 	
 		return str;
-	}, 
-
-	add(num) {
-		return num + 1;
 	},
 
-	active() {
-		return 2;
+	/**
+	* @return {Integer} the current resultIndex
+	*/
+	resultIndex() {
+		return parseInt(Session.get('resultIndex'));
 	},
 
-	equal(a, b) {
-		return a === b;
-	},
-
-	studentIndex() {
-		return parseInt(Session.get('studentIndex'));
-	},
-
+	/**
+	* @return {Integer} the current questionIndex
+	*/
 	questionIndex() {
 		return parseInt(Session.get('questionIndex'));
 	},
 
-	getResponses(index) {
-		return Session.get('results')[index].responses;
+	/**
+	* Get all of the multiple choice responses submitted by the student from a certain result
+	* @param {Integer} the resultIndex of the result
+	* @return {Array} all of the student's multiple choice responses
+	*/
+	getResponses(resultIndex) {
+		return Session.get('results')[resultIndex].responses;
 	},
 
-	answer(studentIndex, questionIndex) {
-		return Session.get('results')[studentIndex].test[questionIndex].a;
+	/**
+	* Get the correct multiple choice answer to certain question from a certain result
+	* @param {Integer} the resultIndex of the result
+	* @param {Integer} the questionIndex of the question
+	* @return {String} the correct multiple choice answer to that question
+	*/
+	answer(resultIndex, questionIndex) {
+		return Session.get('results')[resultIndex].test[questionIndex].a;
 	},
 
-	response(studentIndex, questionIndex) {
-		var r = Session.get('results')[studentIndex].responses[questionIndex];
+	/**
+	* Get the multiple choice response submitted by the student to a certain question from a certain result
+	* @param {Integer} the resultIndex of the result
+	* @param {Integer} the questionIndex of the question
+	* @return {String} the response multiple choice response for that question
+	*/
+	response(resultIndex, questionIndex) {
+		var r = Session.get('results')[resultIndex].responses[questionIndex];
 		return r === 'O' ? 'Omitted' : r;
 	},
 
+	/**
+	* @return {Array} all of the results
+	*/
 	results() {
 		return Session.get('results');
 	},
 
-	firstName(studentIndex) {
-		return Session.get('results')[studentIndex].name.split(', ')[1].split(' ')[0];
+	/**
+	* Get the first name of a student who owns a certain result
+	* @param {Integer} the resultIndex of the result
+	* @return {String} the student's first name
+	*/
+	firstName(resultIndex) {
+		return Session.get('results')[resultIndex].name.split(', ')[1].split(' ')[0];
 	},
 
-	reflection(studentIndex) {
-		return Session.get('results')[studentIndex].reflection;
+	/**
+	* Get the reflection of a certain result
+	* @param {Integer} the resultIndex
+	* @return {String} the reflection 
+	*/
+	reflection(resultIndex) {
+		return Session.get('results')[resultIndex].reflection;
 	},
 
-	image(studentIndex, questionIndex, mode) {
-		return (questionIndex < 8 ? 'non-calc/' : 'calc/') + Session.get('results')[studentIndex].test[questionIndex].q + (mode === 'solution' ? 's' : '') + '.png';
+	/**
+	* Get the URL of the image to display
+	* @param {Integer} the resultIndex of the results which are being viewed
+	* @param {Integer} the questionIndex of the question which is being viewed
+	* @return {String} the URL of the image
+	*/
+	image(resultIndex, questionIndex) {
+		return (questionIndex < 8 ? 'non-calc/' : 'calc/') + Session.get('results')[resultIndex].test[questionIndex].q + (Session.get('mode') === 'solution' ? 's' : '') + '.png';
 	},
 
+	/**
+	* @return {String} the current image mode ('question' or 'solution')
+	*/
 	mode() {
 		return Session.get('mode');
 	},
 
-	grade(index) {
-		return Session.get('results')[index].grade;
+	/**
+	* Get the grade of a given result
+	* @param {Integer} a resultIndex
+	* @return {Integer} the grade of the result at the resultIndex 
+	*/
+	grade(resultIndex) {
+		return parseInt(Session.get('results')[resultIndex].grade);
 	},
 
-	csv() {
-		var element = document.createElement('a');
-
-  		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + buildCSV());
-  		element.setAttribute('download', 'grades.csv');
-  		element.style.display = 'none';
-  		document.body.appendChild(element);
-  		element.click();
-  		document.body.removeChild(element);
-	},
-
+	/**
+	* @return {Integer} the current testIndex
+	*/
 	testIndex() {
 		return parseInt(Session.get('testIndex'));
 	}
 });
 
-function currentTestResults() {
-	var res = [];
-	for (var i = 0; i < Session.get('results').length; i++)
-		if (parseInt(Session.get('results')[i].testIndex) === parseInt(Session.get('testIndex')))
-			res.push(Session.get('results')[i]);
-	return res;
-}
-
-function updateTime() {
-	var n = 1000 * 60 * (Session.get('mode') === 'test' ? .5 : .5) - Date.now() + Session.get('start-time');
-
-	if (n < 0) {
-		if (Session.get('mode') == 'test') {
-			changeProblem(0);
-			Session.set('start-time', Date.now());
-			Session.set('mode', 'check');
-		} else {
-			var r = [];
-			$.each(Session.get('responses'), function(i, val) {
-				r.push(val === 'F' ? 'O' : val);
-			});
-
-			Meteor.call('insertTest', Session.get('studentId'), Session.get('testIndex'), r, $('#comment').val(), function (err, res) {
-				if (err)
-					return nofity(err.error, true);
-			});
-
-			window.clearInterval(Session.get('intervalHandle'));
-			Session.set('mode', 'done');
-			notify('Responses Submitted!', false);
-		}
-
-		return '0:00';
-	}
-
-  	Session.set('time', parseInt(n / 1000 / 60) + ':' + ('0' + parseInt(n / 1000 % 60)).slice(-2));
-}
-
-function changeProblem(index) {
-	if (index < 0 || index > 11)
-			return;
-	
-	if (Session.get('mode') === 'test') {
-		var r = Session.get('responses'),
-			ans = $('input:checked').val();
-	
-		r[Session.get('index')] = ans;
-	
-		if (ans)
-			Session.set('responses', r);
-	
-		$('input').prop('checked', false);
-	
-		Session.set('index', index);
-	
-		$('input').filter(function() {
-  			return this.value === Session.get('responses')[Session.get('index')];
-  		}).prop('checked', true);
-  	} else {
-  		Session.set('index', index);
-  	}
-}
-
-Template.app.events({
-	'click .tabs': function(event, instance) {
-		changeProblem(event.target.textContent - 1);
-	},
-
-<<<<<<< HEAD
-	'click #student-id-submit': function(event, instance) {
-		var id = $('#student-id').val();
-
-		if (!id)
-			return shakeInput();
-
-		Meteor.call('getTest', id, function(err, res) {
-			if (err) {
-				shakeInput();
-				return notify(err.error, true);
-			}
-
-			if (res.mode && res.mode === 'teacher') {
-				for (var i = 0; i < res.res.length; i++) {
-					var correct = 0;
-					for (var j = 0; j < res.res[i].responses.length; j++)
-						if (res.res[i].responses[j] === res.res[i].test[j].a)
-							correct++;
-					res.res[i].score = correct + '/' + res.res[i].responses.length;
-				}
-
-				Session.set('mode', 'question');
-				Session.set('questionIndex', 0);
-				Session.set('testIndex', 0);
-				Session.set('results', res.res);
-				Session.set('studentIndex', getFirstStudentInTableIndex());
- 				
-				return BlazeLayout.render('teacher', { res: res.res });
-			}
-
-			Session.set('studentId', id);
-			Session.set('testIndex', res.testIndex);
-			Session.set('mode', 'test');
-			Session.set('start-time', Date.now());
-			Session.set('questions', res.questions);
-			Session.set('index', 0);
-			Session.set('responses', fillArray('F', 12));
-
-			updateTime();
-			Session.set('intervalHandle', window.setInterval(updateTime, 1000));
-		}
-	},
-	
-	'keydown #student-id' : function(event, instance) {
-		if(event.which === 13)
-			login();
-	},
-
-	'click #student-id-submit': function(event, instance) {
-		login();
-	},
-
-	'click #previous': function(event, instance) {
-		changeProblem(Session.get('index') - 1);
-	},
-
-	'click #next': function(event, instance) {
-		changeProblem(Session.get('index') + 1);
-	}
-});
-
 Template.teacher.events({
+	/**
+	* View the results of a different test
+	*/
 	'click .tr-click': function(event, instance) {
 		Session.set('questionIndex', 0);
-		Session.set('studentIndex', $(event.currentTarget).attr('name'));
+		Session.set('resultIndex', $(event.currentTarget).attr('name'));
 	},
 
+	/**
+	* Goto a different question using the nav buttons
+	*/
 	'click .tabs': function(event, instance) {
 		Session.set('questionIndex', $(event.currentTarget).attr('id'));
 	},
 
+	/**
+	* Goto the previous question
+	*/
 	'click #previous': function(event, instance) {
 		var current = Session.get('questionIndex');
 		Session.set('questionIndex', current > 0 ? current - 1 : 0);
 	},
 
+	/**
+	* Goto the next question
+	*/
 	'click #next': function(event, instance) {
 		var current = Session.get('questionIndex');
 		Session.set('questionIndex', current < 11 ? current + 1 : 11);
 	},
 
+	/**
+	* Switch to question mode
+	*/
 	'click #question-mode': function(event, instance) {
 		Session.set('mode', 'question');
 	},
 
+	/**
+	* Switch to solution mode
+	*/
 	'click #solution-mode': function(event, instance) {
 		Session.set('mode', 'solution');
 	},
 
+	/**
+	* Change the grade given to a test
+	*/
 	'click .grade': function(event, instance) {
-		var arr = $(event.currentTarget).attr('name').split(' '),
+		var arr = $(event.currentTarget).attr('name').split(' '), //the grade element's name contains its resultIndex and percentage grade, separated by a space
 			r = Session.get('results');
 
-		r[arr[0]].grade = parseInt(arr[1]);
+		//update the grade locally
+		r[parseInt(arr[0])].grade = parseInt(arr[1]);
 		Session.set('results', r);
+
+		//query the server to update the grade in the database
 		Meteor.call('updateGrade', Session.get('results')[arr[0]]._id, parseInt(arr[1]));
 	},
 
+	/**
+	* Download CSV
+	*/
 	'click #csv': function(event, instance) {
 		var element = document.createElement('a');
 
@@ -367,6 +411,9 @@ Template.teacher.events({
   		document.body.removeChild(element);
 	},
 
+	/**
+	* Export to google spreadsheet
+	*/
 	'click #sheets': function(event, instance) {
 		Meteor.call('updateSheet', buildCSV(), function(err, res) {
 			if (err)
@@ -376,74 +423,154 @@ Template.teacher.events({
 		});
 	},
 
+	/**
+	* Change the testIndex when a new testIndex is clicked
+	*/
 	'click .change-test-index': function(event, instance) {
 		var index = parseInt($(event.currentTarget).attr('name')),
 			previous = parseInt(Session.get('testIndex'));
 
 		Session.set('testIndex', index);
 
-		//if the test number changed, set the selected table row to the first row in this testIndex's view
-		// if (parseInt(Session.get('testIndex')) !== index)
+		//if the testIndex changed, set the selected table row to the first row in this testIndex's view
 		if (index !== previous)
-			Session.set('studentIndex', getFirstStudentInTableIndex());	
+			Session.set('resultIndex', getFirstStudentInTableIndex());	
 	}
 });
 
-function getFirstStudentInTableIndex() {
+/**
+* Get the results whose testIndex match the current testIndex
+* @return {Array} an array of results
+*/
+function getCurrentTestResults() {
+	var res = [];
+	for (var i = 0; i < Session.get('results').length; i++)
+		if (parseInt(Session.get('results')[i].testIndex) === parseInt(Session.get('testIndex')))
+			res.push(Session.get('results')[i]);
+	return res;
+}
+
+/**
+* Get the resultIndex of the first result in the table (the first result whose testIndex matches the current testIndex)
+* @return {Integer} the resultIndex of the result
+*/
+function getFirstResultInTableIndex() {
 	for (var i = 0; i < Session.get('results').length; i++)
 		if (Session.get('results')[i].testIndex === Session.get('testIndex'))
 			return i;
 }
 
-Template.teacher.onRendered(function () {
-	$(window).resize(resizeTeacher);
-	$(resizeTeacher);
-});
-
-Template['test-footer'].onRendered(function () {
-	$(window).resize(resizeStudent);
-	$(resizeStudent);
-});
-
+/**
+* Builds a csv file containing the results at the current testIndex
+* @return {String} an encoded and ready-to-be-downloaded csv file
+*/
 function buildCSV() {
-	var r = currentTestResults(),
+	var r = getCurrentTestResults(),
 		s = '';
 	for (var i = 0; i < r.length; i++)
 			s += (r[i].studentId + ',' + (((!r[i].grade && r[i].grade !== 0) || r[i].grade === -1) ? 'N/A' : r[i].grade) + '\n');
 	return encodeURIComponent(s);
 }
 
+/**
+* Function to be called on the resize of the teacher view
+* Adjusts the height of the scrollable table according to the window size
+*/
 function resizeTeacher() {
+	console.log('resize teacher');
 	var size = ($(window).height() - $('#teacher-nav').height() - $('#test-selector').height()) + 'px';
 	$('#table-scroll').css('max-height', size);
 }
 
-function resizeStudent() {
-	var t = $('#navbar-top').height(),
-		b = $('#navbar-bottom').height();
+/**
+* Intialize and call the resize listener
+*/
+Template.teacher.onRendered(function () {
+	$(window).resize(resizeTeacher);
+	$(resizeTeacher);
+});
 
-	$(document.body).css({
-		'padding-top': (t ? (t + 'px') : '0px'),
-		'padding-bottom': (b ? (b + 'px') : '0px')
+/*
+* ======================================= Login Template ==============================================
+*/
+
+Template.login.events({
+	/**
+	* log in if the user presses enter
+	*/
+	'keydown #student-id': function(event, instance) {
+		if(event.which === 13)
+			login();
+	},
+
+	/**
+	* log in if the user clicks submit
+	*/
+	'click #student-id-submit': function() {
+		login();
+	}
+});
+
+/**
+* Attempt to login a user by student id
+*/
+function login() {
+	var id = $('#student-id').val();
+	if (!id)
+		return shakeInput();
+
+	//query the server
+	Meteor.call('getTest', id, function(err, res) {
+		//there was an error
+		if (err) {
+			shakeInput();
+			return notify(err.error, true);
+		}
+
+		//the teacher id was used to log in
+		if (res.mode && res.mode === 'teacher') {
+			//tally up all student's scores
+			for (var i = 0; i < res.res.length; i++) {
+				var correct = 0;
+				for (var j = 0; j < res.res[i].responses.length; j++)
+					if (res.res[i].responses[j] === res.res[i].test[j].a)
+						correct++;
+				res.res[i].score = correct + '/' + res.res[i].responses.length;
+			}
+
+			//intialize session variables
+			Session.set('mode', 'question');
+			Session.set('testIndex', 0);
+			Session.set('questionIndex', 0);
+			Session.set('results', res.res);
+			Session.set('resultIndex', getFirstResultInTableIndex());
+ 			
+			return BlazeLayout.render('teacher');
+		}
+
+		//intialize session variables
+		Session.set('studentId', id);
+		Session.set('testIndex', res.testIndex);
+		Session.set('mode', 'test');
+		Session.set('start-time', Date.now());
+		Session.set('questions', res.questions);
+		Session.set('questionIndex', 0);
+		Session.set('responses', fillArray('O', 12)); //'O' signifies omitted
+
+		//initialize the countdown
+		updateTime();
+		Session.set('intervalHandle', window.setInterval(updateTime, 1000)); //this handle will be later used to disable the recurrent update time function call
+
+		//welcome the user by their first name
+		notify('Welcome ' + res.name.split(', ')[1].split(' ')[0] + '!');
+		return BlazeLayout.render('student');
 	});
 }
 
-function fillArray(val, length) {
-	var a = [];
-	for (var i = 0; i < length; i++)
-		a.push(val);
 
-	return a;
-}
-
-function notify(text, isError) {
-	$('body').append('<div id="message" class="' + (isError ? 'error' : 'success') + '">' + text + '</div>');
-	$('#message').fadeIn(1000);
-
-	setTimeout(() => $('#message').fadeOut(1000), 2000);
-	setTimeout(() => $('#message').remove(), 3000);
-}
-
+/**
+* Shake the student id input box to signify an invalid id
+*/
 function shakeInput() {
 	var input = $('#student-id');
 	input.addClass('shake');
@@ -453,47 +580,103 @@ function shakeInput() {
 		input.css('border', '3px solid #e6e6e6');
 		input.removeClass('shake')
 	}, 1000);
-<<<<<<< HEAD
-}
-=======
 }
 
-function login() {
-	var id = $('#student-id').val();
-	if (!id)
-		return shakeInput();
-	Meteor.call('getTest', id, function(err, res) {
-		if (err) {
-			shakeInput();
-			return notify(err.error, true);
-		}
-		if (res.mode && res.mode === 'teacher') {
-			for (var i = 0; i < res.res.length; i++) {
-				var correct = 0;
-				for (var j = 0; j < res.res[i].responses.length; j++)
-					if (res.res[i].responses[j] === res.res[i].test[j].a)
-						correct++;
-				res.res[i].score = correct + '/' + res.res[i].responses.length;
-			}
-			Session.set('mode', 'question');
-			Session.set('questionIndex', 0);
-			Session.set('studentIndex', 0);
- 			Session.set('results', res.res);
- 			
-			return BlazeLayout.render('teacher', { res: res.res });
-		}
-		Session.set('studentId', id);
-		Session.set('testIndex', res.testIndex);
-		Session.set('mode', 'test');
-		Session.set('start-time', Date.now());
-		Session.set('questions', res.questions);
-		Session.set('index', 0);
-		Session.set('responses', fillArray('F', 12));
-		updateTime();
-		Session.set('intervalHandle', window.setInterval(updateTime, 1000));
-		notify('Welcome ' + res.name.split(', ')[1].split(' ')[0] + '!');
-	});
+
+
+
+
+/**
+* Increment an integer by one (to convert from index to number)
+* @param {Integer} the integer
+* @return {Integer} the integer plus one
+*/
+Template.registerHelper('add', function(num) {
+	return num + 1;
+});
+
+/**
+* Check if two objects are equal
+* @param {Object} the first object
+* @param {Object} the second object
+* @return {Boolean} a boolean representing their equality
+*/
+Template.registerHelper('equal', function(a, b) {
+	return a === b;
+});
+
+
+Template['test-footer'].helpers({
+	/**
+	* @return {String} the current question type
+	*/
+	type() {
+		return Session.get('index') < 8 ? 'non-calculator' : 'calculator';
+	},
+
+	/**
+	* @return {String} the current question suggested time
+	*/
+	suggested() {
+		return (Session.get('index') < 8 ? '2' : '3') + ' minutes';
+	}
+});
+
+Template['test-footer'].events({
+	/**
+	* Listen for radio button changes and update the stored responses accordingly
+	*/
+	'change input': function (event, instance) {
+		var r = Session.get('responses'),
+			ans = $('input:checked').val();
+	
+		r[Session.get('questionIndex')] = ans;
+	
+		if (ans)
+			Session.set('responses', r);
+	}
+});
+
+Template['check-footer'].helpers({
+	/**
+	* @return {String} the correct answer to the current question
+	*/
+	correct() {
+		return Session.get('questions')[Session.get('questionIndex')].a;
+	},
+
+	/**
+	* @return {String} the student response to the current question
+	*/
+	response() {
+		var r = Session.get('responses')[Session.get('questionIndex')];
+		return r === 'O' ? 'Omitted' : r;
+	}
+});
+
+/**
+* Send a popup to the user
+* @param {String} the message to be sent
+* @param {Boolean} true for an error popup, false for a success popup
+*/
+function notify(text, isError) {
+	$('body').append('<div id="message" class="' + (isError ? 'error' : 'success') + '">' + text + '</div>');
+	$('#message').fadeIn(1000);
+
+	setTimeout(() => $('#message').fadeOut(1000), 2000);
+	setTimeout(() => $('#message').remove(), 3000);
 }
 
-$(window).on('resize', changePadding);
->>>>>>> adf7a8771da635bfda05e60b7b9d5344221ba632
+/**
+* Fill an array with a set value
+* @param {Object} the value to fill the array with
+* @param {Integer} the length of the array to be returned
+* @return {Array} the filled array
+*/
+function fillArray(val, length) {
+	var a = [];
+	for (var i = 0; i < length; i++)
+		a.push(val);
+
+	return a;
+}

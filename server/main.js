@@ -44,7 +44,7 @@ Meteor.methods({
     return { questions: getTest(studentId, t), testIndex: t, name: students[studentId].name };
 	},
 
-  'insertTest': function(studentId, testIndex, responses, reflection) {
+  'insertResult': function(studentId, testIndex, responses, reflection) {
     Responses.insert({
       studentId: studentId,
       testIndex: testIndex,
