@@ -6,15 +6,25 @@
   padding: 6px 0;
   font-size: 12px;
   line-height: 1.428571429;
-  border-radius: 15px;
-  border-width:0;
+  border-radius: 100%;
+  border-width: 0;
 }
 
 .btn-circle:hover, .btn-circle:focus {
-  border-radius: 17px;
-  width: 34px;
-  height: 34px;
   border-width: 0;
+}
+
+.active-button {
+  border-color: lightblue !important;
+  border-width: 2px !important;
+}
+
+.btn-success .active-button {
+  background-color: #d9534f;
+}
+
+.btn-success .active-button {
+  background-color: #d9534f;
 }
 
 @media screen and (max-width: 600px) {
@@ -24,6 +34,10 @@
     width: 15px;
     padding: 3px;
     font-size: 6px;
+  }
+
+  .active-button {
+    border-width: 1px;
   }
 }
 
@@ -157,14 +171,6 @@
   background-color: lightblue !important;
 }
 
-.active-button {
-  border-radius: 17px;
-  border-color: lightblue !important;
-  width: 34px;
-  height: 34px;
-  border-width: 3px !important;
-}
-
 .teacher-tabs {
   display: inline;
   list-style-type: none;
@@ -178,4 +184,8 @@
 
 .grade {
   font-size: .5em;
+}
+
+.btn-toolbar {
+  margin:auto;
 }

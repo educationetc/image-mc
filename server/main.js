@@ -13,16 +13,18 @@ Meteor.startup(() => {
 Meteor.methods({
 	'getTest': function(studentId) {
     if (studentId === '27182') {
-      var r = Responses.find({}, { sort: {studentId: -1} }),
+      var r = Responses.find({}, { sort: {createdAt: -1} }),
         arr = r ? r.fetch() : [],
         res = [];
 
       for (var i = 0; i < arr.length; i++) {
+        var ref = Reflections.findOne({ _id: arr[i]._id });
+
         res.push({
           studentId: arr[i].studentId,
           name: students[arr[i].studentId].name,
           responses: arr[i].responses,
-          reflection: Reflections.findOne({ _id: arr[i]._id }).reflection,
+          reflection: ref ? ref.reflection : '',
           testIndex: arr[i].testIndex,
           test: getTest(arr[i].studentId, arr[i].testIndex),
           createdAt: arr[i].createdAt,
@@ -58,6 +60,7 @@ Meteor.methods({
   },
 
   'updateGrade': function(testId, percentage) {
+    console.log(percentage);
     Responses.update(
       {
         _id: testId
@@ -71,7 +74,7 @@ Meteor.methods({
   },
 
   'updateSheet': function(data) {
-    HTTP.call( 'GET', 'https://script.google.com/macros/s/AKfycbyO4OdShuBK_Vrb2RBEU692WBd0hSBtZfYBJ79Iu7BP7o3PXyc/exec?data=' + data, {}, function(err, res) {
+    HTTP.call( 'GET', 'https://script.google.com/macros/s/AKfycbxf04KlyujdhvBTOO5qW-Q6UM6nj5aX4dyth5GGt6GjeFa9I44/exec?data=' + data, {}, function(err, res) {
       if (err || (res.data.result || '') !== 'success')
         throw new Meteor.Error('Google Spreadsheet could not be updated.');
     });

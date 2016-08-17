@@ -26,8 +26,8 @@
       {{#if signedIn}}
         <h2>Question {{question}}{{#unless isTest}} Solution{{/unless}}</h2>
         <img style="max-width:100%" src="{{image}}">
-        {{changePadding}}
-        <nav id="navbar-bottom" class="navbar navbar-default navbar-fixed-bottom">
+        {{resizeStudent}}
+        <nav id="navbar-bottom" class="navbar navbar-default navbar-fixed-bottom" style="min-height:0">
           <div class="container">
             {{>Template.dynamic template=footer}}
             {{>credits}}
@@ -87,22 +87,29 @@
 
 
 <template name="teacher">
-  <div id="table-scroll" style="overflow:auto">
+  <div id="test-selector" style="float:right;margin:1em">
+    <span>Test Number:</span>
+    <div class="btn-group" style="margin-left:.2em;margin-right:0">
+      <button type="button" class="grade change-test-index btn btn-default{{#if equal testIndex 0}} active{{/if}}" name="0">1</button>
+      <button type="button" class="grade change-test-index btn btn-default{{#if equal testIndex 1}} active{{/if}}" name="1">2</button>
+      <button type="button" class="grade change-test-index btn btn-default{{#if equal testIndex 2}} active{{/if}}" name="2">3</button>
+    </div>
+  </div>
+  <div id="table-scroll" style="overflow:auto;text-align:left;width:100%">
     <table class="table table-striped" id="results">
       <thead>
         <th>Name</th>
         <th>Student ID</th>
-        <th>Test Number</th>
         <th>Score</th>
         <th>Taken</th>
         <th>Grade</th>
       </thead>
-      <tbody>
+      <tbody id="table-body">
         {{#each results}}
+          {{#if equal this.testIndex testIndex}}
           <tr name="{{@index}}" class="tr-click{{#if equal @index studentIndex}} active{{/if}}">
             <td>{{ this.name }}</td>
             <td>{{ this.studentId }}</td>
-            <td>{{ add this.testIndex }}</td>
             <td>{{ this.score }}</td>
             <td>{{ from this.createdAt }}</td>
             <td>
@@ -114,9 +121,10 @@
               </div>  
             </td>
           </tr>
+          {{/if}}
         {{/each}}
         <tr>
-          <td></td><td></td><td></td><td></td><td></td>
+          <td></td><td></td><td></td><td></td>
           <td>
             <div class="btn-toolbar" role="toolbar">
               <div class="btn-group-vertical" role="group">
@@ -138,7 +146,15 @@
                 <h3 class="panel-title">{{firstName studentIndex}}'s Reflection</h3>
               </div>
               <div class="panel-body" style="max-height:10em">
-                <div style="height:7.5em;overflow:auto">{{reflection studentIndex}}</div>
+                <div style="height:7.5em;overflow:auto">
+                  {{#if (reflection studentIndex)}}
+                    {{reflection studentIndex}}
+                  {{else}}
+                    <div style="color:grey">
+                      No reflection submitted.
+                    </div>
+                  {{/if}}
+                </div>
               </div>
             </div>
           </div>
@@ -156,7 +172,7 @@
             <ul style="padding:0">
               {{#each getResponses studentIndex}}
               <li class="teacher-tabs">
-                <button id="{{@index}}" style="outline:none;" class="tabs btn btn-{{#if equal this (answer studentIndex @index)}}success{{else}}danger{{/if}} btn-circle{{#if equal @index questionIndex}} active-button{{/if}}"> {{add  @index}}</button>
+                <button id="{{@index}}" style="outline:none;" class="tabs btn btn-{{#if equal this (answer studentIndex @index)}}success{{else}}danger{{/if}} btn-circle{{#if equal @index questionIndex}} active-button{{/if}}"> {{add @index}}</button>
               </li>
               {{/each}}
             </ul>

@@ -59,8 +59,8 @@ Template.app.helpers({
   	return Session.get('mode') === 'test' ? 'default' : (Session.get('questions')[index].a === Session.get('responses')[index] ? 'success' : 'danger');
   },
 
-  changePadding() {
-  	changePadding();
+  resizeStudent() {
+  	resizeStudent();
   },
 
   active(index) {
@@ -172,21 +172,28 @@ Template['teacher'].helpers({
 	},
 
 	csv() {
-		var r = Session.get('results'),
-			s = '',
-			element = document.createElement('a');
+		var element = document.createElement('a');
 
-		for (var i = 0; i < r.length; i++)
-			s += (r[i].studentId + ',' + (r[i].grade === 0 ? 'N/A' : r[i].grade) + '\n');
-
-  		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(s));
+  		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + buildCSV());
   		element.setAttribute('download', 'grades.csv');
   		element.style.display = 'none';
   		document.body.appendChild(element);
   		element.click();
   		document.body.removeChild(element);
+	},
+
+	testIndex() {
+		return parseInt(Session.get('testIndex'));
 	}
 });
+
+function currentTestResults() {
+	var res = [];
+	for (var i = 0; i < Session.get('results').length; i++)
+		if (parseInt(Session.get('results')[i].testIndex) === parseInt(Session.get('testIndex')))
+			res.push(Session.get('results')[i]);
+	return res;
+}
 
 function updateTime() {
 	var n = 1000 * 60 * (Session.get('mode') === 'test' ? .5 : .5) - Date.now() + Session.get('start-time');
@@ -271,8 +278,9 @@ Template.app.events({
 
 				Session.set('mode', 'question');
 				Session.set('questionIndex', 0);
-				Session.set('studentIndex', 0);
- 				Session.set('results', res.res);
+				Session.set('testIndex', 0);
+				Session.set('results', res.res);
+				Session.set('studentIndex', getFirstStudentInTableIndex());
  				
 				return BlazeLayout.render('teacher', { res: res.res });
 			}
@@ -356,36 +364,53 @@ Template.teacher.events({
 
 			notify('Google Spreadsheet updated!', false);
 		});
+	},
+
+	'click .change-test-index': function(event, instance) {
+		var index = parseInt($(event.currentTarget).attr('name')),
+			previous = parseInt(Session.get('testIndex'));
+
+		Session.set('testIndex', index);
+
+		//if the test number changed, set the selected table row to the first row in this testIndex's view
+		// if (parseInt(Session.get('testIndex')) !== index)
+		if (index !== previous)
+			Session.set('studentIndex', getFirstStudentInTableIndex());	
 	}
 });
 
+function getFirstStudentInTableIndex() {
+	for (var i = 0; i < Session.get('results').length; i++)
+		if (Session.get('results')[i].testIndex === Session.get('testIndex'))
+			return i;
+}
+
 Template.teacher.onRendered(function () {
-	setTimeout(function () {
-		$(resize());
-	}, 0);
+	$(window).resize(resizeTeacher);
+	$(resizeTeacher);
+});
+
+Template['test-footer'].onRendered(function () {
+	$(window).resize(resizeStudent);
+	$(resizeStudent);
 });
 
 function buildCSV() {
-	var r = Session.get('results'),
+	var r = currentTestResults(),
 		s = '';
 	for (var i = 0; i < r.length; i++)
-			s += (r[i].studentId + ',' + (r[i].grade === -1 ? 'N/A' : r[i].grade) + '\n');
+			s += (r[i].studentId + ',' + (((!r[i].grade && r[i].grade !== 0) || r[i].grade === -1) ? 'N/A' : r[i].grade) + '\n');
 	return encodeURIComponent(s);
 }
 
-function resize() {
-	var size = ($(window).height() - $('#teacher-nav').height()) + 'px';
+function resizeTeacher() {
+	var size = ($(window).height() - $('#teacher-nav').height() - $('#test-selector').height()) + 'px';
 	$('#table-scroll').css('max-height', size);
 }
 
-$(window).resize(function () {
-	console.log('window resize');
-	resize();
-});
-
-function changePadding() {
-	var t = $('#navbar-top').height();
-	var b = $('#navbar-bottom').height();
+function resizeStudent() {
+	var t = $('#navbar-top').height(),
+		b = $('#navbar-bottom').height();
 
 	$(document.body).css({
 		'padding-top': (t ? (t + 'px') : '0px'),
@@ -419,5 +444,3 @@ function shakeInput() {
 		input.removeClass('shake')
 	}, 1000);
 }
-
-$(window).on('resize', changePadding);
