@@ -582,9 +582,9 @@ function shakeInput() {
 	}, 1000);
 }
 
-
-
-
+/*
+* ======================================= Global/Miscellaneous ==============================================
+*/
 
 /**
 * Increment an integer by one (to convert from index to number)
