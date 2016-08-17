@@ -104,8 +104,10 @@ Template['teacher'].helpers({
 	
 		if(s / 86400 > 1)
 			str = (~~(s / 86400)) + ' days ago'
-		else if(s / 3600 > 1)
+		else if(s / 7200 > 1)
 			str = (~~(s / 3600)) + ' hours ago'
+		else if(s / 3600 > 1)
+			str = (~~(s / 3600)) + ' hour ago'
 		else if((s / 60) > 1)
 			str = (~~(s / 60)) + ' minutes ago'
 		else
@@ -255,6 +257,7 @@ Template.app.events({
 		changeProblem(event.target.textContent - 1);
 	},
 
+<<<<<<< HEAD
 	'click #student-id-submit': function(event, instance) {
 		var id = $('#student-id').val();
 
@@ -295,9 +298,16 @@ Template.app.events({
 
 			updateTime();
 			Session.set('intervalHandle', window.setInterval(updateTime, 1000));
+		}
+	},
+	
+	'keydown #student-id' : function(event, instance) {
+		if(event.which === 13)
+			login();
+	},
 
-			notify('Welcome ' + res.name.split(', ')[1].split(' ')[0] + '!');
-		});
+	'click #student-id-submit': function(event, instance) {
+		login();
 	},
 
 	'click #previous': function(event, instance) {
@@ -443,4 +453,47 @@ function shakeInput() {
 		input.css('border', '3px solid #e6e6e6');
 		input.removeClass('shake')
 	}, 1000);
+<<<<<<< HEAD
 }
+=======
+}
+
+function login() {
+	var id = $('#student-id').val();
+	if (!id)
+		return shakeInput();
+	Meteor.call('getTest', id, function(err, res) {
+		if (err) {
+			shakeInput();
+			return notify(err.error, true);
+		}
+		if (res.mode && res.mode === 'teacher') {
+			for (var i = 0; i < res.res.length; i++) {
+				var correct = 0;
+				for (var j = 0; j < res.res[i].responses.length; j++)
+					if (res.res[i].responses[j] === res.res[i].test[j].a)
+						correct++;
+				res.res[i].score = correct + '/' + res.res[i].responses.length;
+			}
+			Session.set('mode', 'question');
+			Session.set('questionIndex', 0);
+			Session.set('studentIndex', 0);
+ 			Session.set('results', res.res);
+ 			
+			return BlazeLayout.render('teacher', { res: res.res });
+		}
+		Session.set('studentId', id);
+		Session.set('testIndex', res.testIndex);
+		Session.set('mode', 'test');
+		Session.set('start-time', Date.now());
+		Session.set('questions', res.questions);
+		Session.set('index', 0);
+		Session.set('responses', fillArray('F', 12));
+		updateTime();
+		Session.set('intervalHandle', window.setInterval(updateTime, 1000));
+		notify('Welcome ' + res.name.split(', ')[1].split(' ')[0] + '!');
+	});
+}
+
+$(window).on('resize', changePadding);
+>>>>>>> adf7a8771da635bfda05e60b7b9d5344221ba632

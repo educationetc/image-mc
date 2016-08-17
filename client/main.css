@@ -187,5 +187,9 @@
 }
 
 .btn-toolbar {
-  margin:auto;
+  margin: auto;
+}
+
+th {
+  padding: 8px;
 }
