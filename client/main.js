@@ -140,6 +140,7 @@ Template.student.events({
 			},
 			function(isConfirm){
 				if(isConfirm)
+					changeQuestion(0);
 					Session.set('start-time', Date.now());
 					Session.set('mode', 'check');
 			});
