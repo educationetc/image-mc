@@ -221,16 +221,14 @@ Template['teacher'].helpers({
 	
 		if(s / 86400 > 1)
 			str = (~~(s / 86400)) + ' days ago'
-		else if(s / 7200 > 1)
-			str = (~~(s / 3600)) + ' hours ago'
 		else if(s / 3600 > 1)
-			str = (~~(s / 3600)) + ' hour ago'
+			str = (~~(s / 3600)) + ' hours ago'
 		else if((s / 60) > 1)
 			str = (~~(s / 60)) + ' minutes ago'
 		else
 			str = ~~s + ' seconds ago'
 	
-		return str;
+		return parseInt(str.split(' ')[0]) === 1 ? (str.substring(0, str.length - 5) + str.substring(str.length - 4)) : str; //if its not plural drop the 's'
 	},
 
 	/**
