@@ -124,6 +124,45 @@ Template.student.events({
 	*/
 	'click #next': function(event, instance) {
 		changeQuestion(Session.get('questionIndex') + 1);
+	},
+	'click #finish':function(event,instance){
+		if(Session.get('mode') === 'test'){
+			sweetAlert({
+				title:'Are you sure?',
+				text:'Are you sure you want to submit your answers? You can\'t go back.',
+				type:'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#DD6B55',
+				confirmButtonText: 'Yes, continue to solutions!',
+				cancelButtonText: 'No, I\'m not done!',
+				closeOnConfirm: true,
+				closeOnCancel: true
+			},
+			function(isConfirm){
+				if(isConfirm)
+					Session.set('mode', 'check');
+			});
+		}else if(Session.get('mode') === 'check'){
+			sweetAlert({
+				title:'Are you sure?',
+				text:'Are you sure you want to submit your responses? You can\'t go back.',
+				type:'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#DD6B55',
+				confirmButtonText: 'Yes, I\'m done!',
+				cancelButtonText: 'No, I\'m not done!',
+				closeOnConfirm: true,
+				closeOnCancel: true
+			},
+			function(isConfirm){
+				if(isConfirm)
+					window.clearInterval(Session.get('intervalHandle'));
+					Session.set('mode', 'done');
+					notify('Responses Submitted!', false);
+			});
+		}else{
+			BlazeLayout.render('login');
+		}
 	}
 });
 
@@ -435,7 +474,25 @@ Template.teacher.events({
 		//if the testIndex changed, set the selected table row to the first row in this testIndex's view
 		if (index !== previous)
 			Session.set('resultIndex', getFirstStudentInTableIndex());	
-	}
+	},
+	//signout button
+	'click #signout':function(event, instance){
+		sweetAlert({
+			title:'Are you sure you want to log out?',
+			type:'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#DD6B55',
+			confirmButtonText: 'Yes',
+			cancelButtonText: 'No',
+			closeOnConfirm: true,
+			closeOnCancel: true
+		},
+		function(isConfirm){
+			if(isConfirm){
+				BlazeLayout.render('login');
+			}
+		});
+	},
 });
 
 /**
