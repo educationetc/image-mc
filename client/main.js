@@ -23,7 +23,7 @@ Template.student.helpers({
 
 	/**
 	* Create an array of empty values for handlebars to iterate through while rendering the nav buttons
-	* @return {Array} the array
+	* @return {String[]} the array
 	*/
 	length() {
 		if (!Session.get('questions'))
@@ -250,7 +250,7 @@ Template['teacher'].helpers({
 	/**
 	* Get all of the multiple choice responses submitted by the student from a certain result
 	* @param {Integer} the resultIndex of the result
-	* @return {Array} all of the student's multiple choice responses
+	* @return {String[]} all of the student's multiple choice responses
 	*/
 	getResponses(resultIndex) {
 		return Session.get('results')[resultIndex].responses;
@@ -278,7 +278,7 @@ Template['teacher'].helpers({
 	},
 
 	/**
-	* @return {Array} all of the results
+	* @return {Object[]} all of the results
 	*/
 	results() {
 		return Session.get('results');
@@ -440,7 +440,7 @@ Template.teacher.events({
 
 /**
 * Get the results whose testIndex match the current testIndex
-* @return {Array} an array of results
+* @return {Object[]} an array of results
 */
 function getCurrentTestResults() {
 	var res = [];
@@ -671,7 +671,7 @@ function notify(text, isError) {
 * Fill an array with a set value
 * @param {Object} the value to fill the array with
 * @param {Integer} the length of the array to be returned
-* @return {Array} the filled array
+* @return {Object[]} the filled array
 */
 function fillArray(val, length) {
 	var a = [];
