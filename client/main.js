@@ -157,10 +157,15 @@ Template.student.events({
 				closeOnCancel: true
 			},
 			function(isConfirm){
-				if(isConfirm)
+				if(isConfirm){
+					Meteor.call('insertResult', Session.get('studentId'), Session.get('testIndex'), Session.get('responses'), $('#comment').val(), function (err, res) {
+						if (err)
+							return nofity(err.error, true);
+					});
 					window.clearInterval(Session.get('intervalHandle'));
 					Session.set('mode', 'done');
 					notify('Responses Submitted!', false);
+				}
 			});
 		}else{
 			BlazeLayout.render('login');
