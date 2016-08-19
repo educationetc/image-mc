@@ -17,7 +17,7 @@ Meteor.methods({
   */
 	'getTest': function(studentId) {
     //teacher login
-    if (studentId === '27182') {
+    if (studentId === '27182'||studentId === '19856') {
       var r = Responses.find({}, { sort: {createdAt: -1} }),
         arr = r ? r.fetch() : [],
         res = [];

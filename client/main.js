@@ -124,6 +124,43 @@ Template.student.events({
 	*/
 	'click #next': function(event, instance) {
 		changeQuestion(Session.get('questionIndex') + 1);
+	},
+	'click #finish':function(event,instance){
+		if(Session.get('mode') === 'test'){
+			sweetAlert({
+				title:'Are you sure?',
+				text:'Are you sure you want to submit your answers? You can\'t go back.',
+				type:'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#DD6B55',
+				confirmButtonText: 'Yes, continue to solutions!',
+				cancelButtonText: 'No, I\'m not done!',
+				closeOnConfirm: true,
+				closeOnCancel: true
+			},
+			function(isConfirm){
+				if(isConfirm)
+					testMode();
+			});
+		}else if(Session.get('mode') === 'check'){
+			sweetAlert({
+				title:'Are you sure?',
+				text:'Are you sure you want to submit your responses? You can\'t go back.',
+				type:'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#DD6B55',
+				confirmButtonText: 'Yes, I\'m done!',
+				cancelButtonText: 'No, I\'m not done!',
+				closeOnConfirm: true,
+				closeOnCancel: true
+			},
+			function(isConfirm){
+				if(isConfirm)
+					checkMode();
+			});
+		}else{
+			BlazeLayout.render('login');
+		}
 	}
 });
 
@@ -155,23 +192,14 @@ function resizeStudent() {
 */
 function updateTime() {
 	var n = 1000 * 60 * (Session.get('mode') === 'test' ? .5 : .5) - Date.now() + Session.get('start-time');
+	console.log(n);
 
 	//time ran out
 	if (n < 0) {
 		if (Session.get('mode') == 'test') { //test mode
-			changeQuestion(0);
-			Session.set('start-time', Date.now());
-			Session.set('mode', 'check');
-		} else { //question mode
-			//query the server to insert the new result
-			Meteor.call('insertResult', Session.get('studentId'), Session.get('testIndex'), Session.get('responses'), $('#comment').val(), function (err, res) {
-				if (err)
-					return nofity(err.error, true);
-			});
-
-			window.clearInterval(Session.get('intervalHandle')); //stop the countdown
-			Session.set('mode', 'done');
-			notify('Responses Submitted!', false);
+			testMode();
+		} else { //check mode
+			checkMode();
 		}
 
 		return Session.set('time', '0:00');
@@ -179,7 +207,24 @@ function updateTime() {
 
   	Session.set('time', parseInt(n / 1000 / 60) + ':' + ('0' + parseInt(n / 1000 % 60)).slice(-2)); //build the time string
 }
+//transitions from test mode to check mode
+function testMode(){
+	changeQuestion(0);
+	Session.set('start-time', Date.now());
+	Session.set('mode', 'check');
+}
+//transitions from check mode to done mode
+function checkMode(){
+	//query the server to insert the new result
+	Meteor.call('insertResult', Session.get('studentId'), Session.get('testIndex'), Session.get('responses'), $('#comment').val(), function (err, res) {
+		if (err)
+			return nofity(err.error, true);
+	});
 
+	window.clearInterval(Session.get('intervalHandle')); //stop the countdown
+	Session.set('mode', 'done');
+	notify('Responses Submitted!', false);
+}
 /**
 * Change the question being displayed
 * @param {Integer} the questionIndex to change to
@@ -433,7 +478,25 @@ Template.teacher.events({
 		//if the testIndex changed, set the selected table row to the first row in this testIndex's view
 		if (index !== previous)
 			Session.set('resultIndex', getFirstStudentInTableIndex());	
-	}
+	},
+	//signout button
+	'click #signout':function(event, instance){
+		sweetAlert({
+			title:'Are you sure you want to log out?',
+			type:'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#DD6B55',
+			confirmButtonText: 'Yes',
+			cancelButtonText: 'No',
+			closeOnConfirm: true,
+			closeOnCancel: true
+		},
+		function(isConfirm){
+			if(isConfirm){
+				BlazeLayout.render('login');
+			}
+		});
+	},
 });
 
 /**

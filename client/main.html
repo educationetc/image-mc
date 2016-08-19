@@ -17,6 +17,7 @@
           </ul>
           <div class="nav navbar-nav navbar-right">
             <p class="navbar-text" id="timer">{{#unless isDone}}Time Remaining: {{time}}{{else}}Responses Submitted{{/unless}}</p>
+            <button id="finish" class="btn btn-primary navbar-btn">{{#unless isDone}}{{#unless isTest}}Submit Responses{{else}}Finish Test{{/unless}}{{else}}Sign Out{{/unless}}</button>
           </div>
         </div>
       </div>
@@ -82,10 +83,11 @@
   </button>
 </template>
 
-<template name="credits"><p class="text-muted" id="credits">&copy; Education Etc 2016. Designed by Ben Orgera</p></template>
+<template name="credits"><p class="text-muted" id="credits">&copy; Education Etc 2016. Designed by Ben Orgera and Jacob Kalodner</p></template>
 
 
 <template name="teacher">
+  <button id="signout" type="button" class="btn btn-primary" style="float:left;margin:1em">Sign Out</button>
   <div id="test-selector" style="float:right;margin:1em">
     <span>Test Number:</span>
     <div class="btn-group" style="margin-left:.2em;margin-right:0">
