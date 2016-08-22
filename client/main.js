@@ -87,14 +87,6 @@ Template.student.helpers({
 	},
 
 	/**
-	* A means of calling the resizeStudent listener each time the HTML is rendered (because this call is in the HTML)
-	* This may not be neccesary
-	*/
-	resizeStudent() {
-		resizeStudent();
-	},
-
-	/**
 	* Check if a given questionIndex is the current questionIndex
 	* @param {Integer} the questionIndex
 	* @return {Boolean} a boolean representation of whether the questionIndex is the current questionIndex
@@ -177,13 +169,12 @@ Template.student.onRendered(function () {
 * Pads the question/solution images according to the window size
 */
 function resizeStudent() {
-	console.log('resize student');
 	var t = $('#navbar-top').height(),
 		b = $('#navbar-bottom').height();
 
 	$(document.body).css({
-		'padding-top': (t ? (t + 'px') : '0px'),
-		'padding-bottom': (b ? (b + 'px') : '0px')
+		'padding-top': (t ? t : 0) + 'px',
+		'padding-bottom': (b ? b : 0) + 'px'
 	});
 }
 
@@ -191,29 +182,30 @@ function resizeStudent() {
 * Update the time displayed, and handle the countdown reaching 0
 */
 function updateTime() {
-	var n = 1000 * 60 * (Session.get('mode') === 'test' ? .5 : .5) - Date.now() + Session.get('start-time');
+	var n = 1000 * 60 * (Session.get('mode') === 'test' ? .1 : 5) - Date.now() + Session.get('start-time');
 	console.log(n);
 
 	//time ran out
 	if (n < 0) {
-		if (Session.get('mode') == 'test') { //test mode
-			testMode();
-		} else { //check mode
-			checkMode();
-		}
-
+		Session.get('mode') === 'test' ? testMode() : checkMode(); //switch to the appropriate mode
 		return Session.set('time', '0:00');
 	}
 
   	Session.set('time', parseInt(n / 1000 / 60) + ':' + ('0' + parseInt(n / 1000 % 60)).slice(-2)); //build the time string
 }
-//transitions from test mode to check mode
+
+/**
+* Transitions from test mode to check mode
+*/
 function testMode(){
 	changeQuestion(0);
 	Session.set('start-time', Date.now());
 	Session.set('mode', 'check');
 }
-//transitions from check mode to done mode
+
+/**
+* Transitions from check mode to done mode
+*/
 function checkMode(){
 	//query the server to insert the new result
 	Meteor.call('insertResult', Session.get('studentId'), Session.get('testIndex'), Session.get('responses'), $('#comment').val(), function (err, res) {
@@ -225,6 +217,7 @@ function checkMode(){
 	Session.set('mode', 'done');
 	notify('Responses Submitted!', false);
 }
+
 /**
 * Change the question being displayed
 * @param {Integer} the questionIndex to change to
@@ -244,6 +237,7 @@ function changeQuestion(questionIndex) {
   	}
 
   	Session.set('questionIndex', questionIndex);
+  	resizeStudent();
 }
 
 /*
@@ -482,7 +476,7 @@ Template.teacher.events({
 	//signout button
 	'click #signout':function(event, instance){
 		sweetAlert({
-			title:'Are you sure you want to log out?',
+			title:'Are you sure you want to sign out?',
 			type:'warning',
 			showCancelButton: true,
 			confirmButtonColor: '#DD6B55',
@@ -538,7 +532,6 @@ function buildCSV() {
 * Adjusts the height of the scrollable table according to the window size
 */
 function resizeTeacher() {
-	console.log('resize teacher');
 	var size = ($(window).height() - $('#teacher-nav').height() - $('#test-selector').height()) + 'px';
 	$('#table-scroll').css('max-height', size);
 }
@@ -547,10 +540,9 @@ function resizeTeacher() {
 * ======================================= Login Template ==============================================
 */
 
-Template.login.onRendered(function(){
+Template.teacher.onRendered(function(){
 	$(window).resize(resizeTeacher);
 	$(resizeTeacher);
-	$(resizeStudent);
 });
 
 Template.login.events({
