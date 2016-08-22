@@ -543,17 +543,15 @@ function resizeTeacher() {
 	$('#table-scroll').css('max-height', size);
 }
 
-/**
-* Intialize and call the resize listener
-*/
-Template.teacher.onRendered(function () {
-	$(window).resize(resizeTeacher);
-	$(resizeTeacher);
-});
-
 /*
 * ======================================= Login Template ==============================================
 */
+
+Template.login.onRendered(function(){
+	$(window).resize(resizeTeacher);
+	$(resizeTeacher);
+	$(resizeStudent);
+});
 
 Template.login.events({
 	/**
