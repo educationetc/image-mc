@@ -536,14 +536,16 @@ function resizeTeacher() {
 	$('#table-scroll').css('max-height', size);
 }
 
-/*
-* ======================================= Login Template ==============================================
-*/
-
 Template.teacher.onRendered(function(){
 	$(window).resize(resizeTeacher);
 	$(resizeTeacher);
 });
+/*
+* ======================================= Login Template ==============================================
+*/
+Template.login.onRendered(function(){
+	$(resizeStudent);
+})
 
 Template.login.events({
 	/**
