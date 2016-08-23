@@ -18,7 +18,7 @@ Template.student.helpers({
 	* @return {String} the URL of the image corresponding to the current question
 	*/
 	image() {
-		return (Session.get('questionIndex') < 8 ? 'non-calc/' : 'calc/') + Session.get('questions')[(parseInt(Session.get('questionIndex')))].q + (Session.get('mode') === 'check' ? 's' : '') + '.png';
+		return (Session.get('questionIndex') < 8 ? 'non-calc/' : 'calc/') + Session.get('questions')[(parseInt(Session.get('questionIndex')))].q + (((Session.get('mode') === 'check')||(Session.get('mode') === 'done')) ? 's' : '') + '.png';
 	},
 
 	/**
@@ -183,7 +183,6 @@ function resizeStudent() {
 */
 function updateTime() {
 	var n = 1000 * 60 * (Session.get('mode') === 'test' ? .1 : 5) - Date.now() + Session.get('start-time');
-	console.log(n);
 
 	//time ran out
 	if (n < 0) {
@@ -346,7 +345,7 @@ Template['teacher'].helpers({
 	* @return {String} the URL of the image
 	*/
 	image(resultIndex, questionIndex) {
-		return (questionIndex < 8 ? 'non-calc/' : 'calc/') + Session.get('results')[resultIndex].test[questionIndex].q + (Session.get('mode') === 'solution' ? 's' : '') + '.png';
+		return (questionIndex < 8 ? 'non-calc/' : 'calc/') + Session.get('results')[resultIndex].test[questionIndex].q + ((Session.get('mode') === 'solution') ? 's' : '') + '.png';
 	},
 
 	/**
