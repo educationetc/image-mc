@@ -182,7 +182,7 @@ function resizeStudent() {
 * Update the time displayed, and handle the countdown reaching 0
 */
 function updateTime() {
-	var n = 1000 * 60 * (Session.get('mode') === 'test' ? 28 : 12) - Date.now() + Session.get('start-time');
+	var n = 1000 * 60 * (Session.get('mode') === 'test' ? .1 : .1) - Date.now() + Session.get('start-time');
 
 	//time ran out
 	if (n < 0) {
@@ -475,9 +475,15 @@ Template.teacher.events({
 		if (index !== previous)
 			Session.set('resultIndex', getFirstResultInTableIndex());	
 	},
-	// 'click .change-period': function(event,instance) {
+	'click .change-period': function(event,instance) {
+		var index = parseInt($(event.currentTarget).attr('name')),
+			previous = parseInt(Session.get('period'));
 
-	// },
+		Session.set('period', index);
+
+		if (index !== previous)
+			Session.set('resultIndex', getFirstResultInTableIndex());
+	},
 	//signout button
 	'click #signout':function(event, instance){
 		sweetAlert({
