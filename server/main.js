@@ -28,6 +28,7 @@ Meteor.methods({
         res.push({
           studentId: arr[i].studentId,
           name: students[arr[i].studentId].name,
+          period: students[arr[i].studentId].period,
           responses: arr[i].responses,
           reflection: ref ? ref.reflection : '',
           testIndex: arr[i].testIndex,

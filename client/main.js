@@ -182,7 +182,7 @@ function resizeStudent() {
 * Update the time displayed, and handle the countdown reaching 0
 */
 function updateTime() {
-	var n = 1000 * 60 * (Session.get('mode') === 'test' ? .1 : 5) - Date.now() + Session.get('start-time');
+	var n = 1000 * 60 * (Session.get('mode') === 'test' ? 28 : 12) - Date.now() + Session.get('start-time');
 
 	//time ran out
 	if (n < 0) {
@@ -369,6 +369,9 @@ Template['teacher'].helpers({
 	*/
 	testIndex() {
 		return parseInt(Session.get('testIndex'));
+	},
+	period() {
+		return Session.get('period');
 	}
 });
 
@@ -470,8 +473,11 @@ Template.teacher.events({
 
 		//if the testIndex changed, set the selected table row to the first row in this testIndex's view
 		if (index !== previous)
-			Session.set('resultIndex', getFirstStudentInTableIndex());	
+			Session.set('resultIndex', getFirstResultInTableIndex());	
 	},
+	// 'click .change-period': function(event,instance) {
+
+	// },
 	//signout button
 	'click #signout':function(event, instance){
 		sweetAlert({
@@ -593,6 +599,7 @@ function login() {
 			//intialize session variables
 			Session.set('mode', 'question');
 			Session.set('testIndex', 0);
+			Session.set('period', 6);
 			Session.set('questionIndex', 0);
 			Session.set('results', res.res);
 			Session.set('resultIndex', getFirstResultInTableIndex());
@@ -655,6 +662,10 @@ Template.registerHelper('add', function(num) {
 */
 Template.registerHelper('equal', function(a, b) {
 	return a === b;
+});
+
+Template.registerHelper('and', function(res, res2){
+	return res && res2;
 });
 
 
