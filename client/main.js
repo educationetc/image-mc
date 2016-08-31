@@ -508,6 +508,16 @@ Template.teacher.events({
 		resizeTeacher();
 	},
 
+	'click .change-period': function(event,instance) {
+		var index = parseInt($(event.currentTarget).attr('name')),
+			previous = parseInt(Session.get('period'));
+
+		Session.set('period', index);
+
+		if (index !== previous)
+			Session.set('resultIndex', getFirstResultInTableIndex());
+	},
+
 	//signout button
 	'click #signout':function(event, instance){
 		sweetAlert({
