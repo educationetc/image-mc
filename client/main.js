@@ -182,7 +182,7 @@ function resizeStudent() {
 * Update the time displayed, and handle the countdown reaching 0
 */
 function updateTime() {
-	var n = 1000 * 60 * (Session.get('mode') === 'test' ? 28 : 12) - Date.now() + Session.get('start-time');
+	var n = 1000 * 60 * (Session.get('mode') === 'test' ? .1 : .1) - Date.now() + Session.get('start-time');
 
 	//time ran out
 	if (n < 0) {
@@ -317,6 +317,7 @@ Template['teacher'].helpers({
 	* @return {Object[]} all of the results
 	*/
 	results() {
+		console.log(Session.get('results'));
 		return Session.get('results');
 	},
 
@@ -370,8 +371,21 @@ Template['teacher'].helpers({
 	testIndex() {
 		return parseInt(Session.get('testIndex'));
 	},
+
+	/**
+	* @return {Integer} the current period
+	*/
 	period() {
-		return Session.get('period');
+		return parseInt(Session.get('period'));
+	},
+
+	resizeTeacher() {
+		resizeTeacher();
+		console.log('yo');
+	},
+
+	tableHasElements() {
+		return $('#results tr').length > 0;
 	}
 });
 
@@ -424,7 +438,7 @@ Template.teacher.events({
 	/**
 	* Change the grade given to a test
 	*/
-	'click .grade': function(event, instance) {
+	'click .update-grade': function(event, instance) {
 		var arr = $(event.currentTarget).attr('name').split(' '), //the grade element's name contains its resultIndex and percentage grade, separated by a space
 			r = Session.get('results');
 
@@ -473,11 +487,27 @@ Template.teacher.events({
 
 		//if the testIndex changed, set the selected table row to the first row in this testIndex's view
 		if (index !== previous)
-			Session.set('resultIndex', getFirstResultInTableIndex());	
-	},
-	// 'click .change-period': function(event,instance) {
+			Session.set('resultIndex', getFirstResultInTableIndex());
 
-	// },
+		resizeTeacher();
+	},
+
+	/**
+	* Change the testIndex when a new testIndex is clicked
+	*/
+	'click .change-period': function(event, instance) {
+		var index = parseInt($(event.currentTarget).attr('name')),
+			previous = parseInt(Session.get('testIndex'));
+
+		Session.set('period', index);
+
+		//if the testIndex changed, set the selected table row to the first row in this testIndex's view
+		if (index !== previous)
+			Session.set('resultIndex', getFirstResultInTableIndex());	
+
+		resizeTeacher();
+	},
+
 	//signout button
 	'click #signout':function(event, instance){
 		sweetAlert({
@@ -516,8 +546,9 @@ function getCurrentTestResults() {
 */
 function getFirstResultInTableIndex() {
 	for (var i = 0; i < Session.get('results').length; i++)
-		if (Session.get('results')[i].testIndex === Session.get('testIndex'))
+		if (Session.get('results')[i].testIndex === Session.get('testIndex') && Session.get('period') === Session.get('results')[i].period)
 			return i;
+	return -1; //-1 means there are no results matching the selected period and testIndex
 }
 
 /**
@@ -539,6 +570,8 @@ function buildCSV() {
 function resizeTeacher() {
 	var size = ($(window).height() - $('#teacher-nav').height() - $('#test-selector').height()) + 'px';
 	$('#table-scroll').css('max-height', size);
+
+	setTimeout(resizeTeacher, 0); //call resize again on another thread (neccesary to avoid race condition with handlebars)
 }
 
 Template.teacher.onRendered(function(){
@@ -664,6 +697,12 @@ Template.registerHelper('equal', function(a, b) {
 	return a === b;
 });
 
+/**
+* Check if two objects evaulate to true
+* @param {Object} the first object
+* @param {Object} the second object
+* @return {Boolean} a boolean (true if both objects evaluate to true, false if not)
+*/
 Template.registerHelper('and', function(res, res2){
 	return res && res2;
 });

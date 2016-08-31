@@ -25,7 +25,6 @@
     <div style="text-align:center">
       <h2>Question {{question}}{{#unless isTest}} Solution{{/unless}}</h2>
       <img style="max-width:100%" src="{{image}}">
-      {{resizeStudent}}
       <nav id="navbar-bottom" class="navbar navbar-default navbar-fixed-bottom" style="min-height:0">
         <div class="container">
           {{>Template.dynamic template=footer}}
@@ -95,8 +94,8 @@
       <button type="button" class="grade change-test-index btn btn-default{{#if equal testIndex 1}} active{{/if}}" name="1">2</button>
       <button type="button" class="grade change-test-index btn btn-default{{#if equal testIndex 2}} active{{/if}}" name="2">3</button>
     </div>
-    <span>Period:</span>
-    <div class="btn-group" style="margin-left:.2em;margin-right:0">
+    <span style="margin-left:1em">Period:</span>
+    <div id="period-selector" class="btn-group" style="margin-left:.2em;margin-right:0">
       <button type="button" class="grade change-period btn btn-default{{#if equal period 6}} active{{/if}}" name="6">6</button>
       <button type="button" class="grade change-period btn btn-default{{#if equal period 7}} active{{/if}}" name="7">7</button>
       <button type="button" class="grade change-period btn btn-default{{#if equal period 9}} active{{/if}}" name="9">9</button>
@@ -121,16 +120,17 @@
             <td>{{ when this.createdAt }}</td>
             <td>
               <div class="btn-group">
-                <button type="button" class="btn btn-default grade{{#if equal (grade @index) 0}} active{{/if}}" name="{{@index}} 0">0</button>
-                <button type="button" class="btn btn-default grade{{#if equal (grade @index) 70}} active{{/if}}" name="{{@index}} 70">&#10003;-</button>
-                <button type="button" class="btn btn-default grade{{#if equal (grade @index) 85}} active{{/if}}" name="{{@index}} 85">&#10003;</button>
-                <button type="button" class="btn btn-default grade{{#if equal (grade @index) 100}} active{{/if}}" name="{{@index}} 100">&#10003;+</button>
+                <button type="button" class="btn btn-default grade update-grade{{#if equal (grade @index) 0}} active{{/if}}" name="{{@index}} 0">0</button>
+                <button type="button" class="btn btn-default grade update-grade{{#if equal (grade @index) 70}} active{{/if}}" name="{{@index}} 70">&#10003;-</button>
+                <button type="button" class="btn btn-default grade update-grade{{#if equal (grade @index) 85}} active{{/if}}" name="{{@index}} 85">&#10003;</button>
+                <button type="button" class="btn btn-default grade update-grade{{#if equal (grade @index) 100}} active{{/if}}" name="{{@index}} 100">&#10003;+</button>
               </div>  
             </td>
           </tr>
           {{/if}}
         {{/each}}
         <tr>
+          {{#unless equal resultIndex -1}}
           <td></td><td></td><td></td><td></td>
           <td>
             <div class="btn-toolbar" role="toolbar">
@@ -140,63 +140,68 @@
               </div>
             </div>
           </td>
+          {{else}}
+          <td colspan="5" class="text-muted" style="text-align:center">No students have taken test number {{add testIndex}} from period {{period}}.</td>
+          {{/unless}}
         </tr>
       </tbody>
     </table>
   </div>
     <nav id="teacher-nav" class="navbar navbar-default navbar-fixed-bottom" style="min-height:0">
-      <div class="inline">
-        <div class="container" style="text-align:center;float:left;width:50% !important;">
-          <div class="container" style="text-align:center; float:left;width:100% !important;">
-            <div class="panel panel-default" style="margin-top:1em">
-              <div class="panel-heading">
-                <h3 class="panel-title">{{firstName resultIndex}}'s Reflection</h3>
-              </div>
-              <div class="panel-body" style="max-height:10em">
-                <div style="height:7.5em;overflow:auto">
-                  {{#if (reflection resultIndex)}}
-                    {{reflection resultIndex}}
-                  {{else}}
-                    <div style="color:grey">
-                      No reflection submitted.
-                    </div>
-                  {{/if}}
+      {{#unless equal resultIndex -1}}
+        <div class="inline">
+          <div class="container" style="text-align:center;float:left;width:50% !important;">
+            <div class="container" style="text-align:center; float:left;width:100% !important;">
+              <div class="panel panel-default" style="margin-top:1em">
+                <div class="panel-heading">
+                  <h3 class="panel-title">{{firstName resultIndex}}'s Reflection</h3>
+                </div>
+                <div class="panel-body" style="max-height:10em">
+                  <div style="height:7.5em;overflow:auto">
+                    {{#if (reflection resultIndex)}}
+                      {{reflection resultIndex}}
+                    {{else}}
+                      <div style="color:grey">
+                        No reflection submitted.
+                      </div>
+                    {{/if}}
+                  </div>
                 </div>
               </div>
             </div>
+            <div class="container" style="text-align:center; float:left;width:100% !important;">
+              <button id="previous" type="button" class="btn btn-default next-previous" aria-label="Previous">
+                <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+              </button>
+              <span class="label label-default">Correct Answer: {{answer resultIndex questionIndex}}</span>
+              <span class="label label-success">{{firstName resultIndex}}'s Answer: {{response resultIndex questionIndex}}</span>
+              <button id="next" type="button" class="btn btn-default next-previous" aria-label="Next">
+                <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+              </button>
+            </div>
+            <div class="container" style="text-align:center;float:left;width:100% !important;">
+              <ul style="padding:0">
+                {{#each getResponses resultIndex}}
+                <li class="teacher-tabs">
+                  <button id="{{@index}}" style="outline:none;" class="tabs btn btn-{{#if equal this (answer resultIndex @index)}}success{{else}}danger{{/if}} btn-circle{{#if equal @index questionIndex}} active-button{{/if}}"> {{add @index}}</button>
+                </li>
+                {{/each}}
+              </ul>
+            </div>
           </div>
-          <div class="container" style="text-align:center; float:left;width:100% !important;">
-            <button id="previous" type="button" class="btn btn-default next-previous" aria-label="Previous">
-              <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-            </button>
-            <span class="label label-default">Correct Answer: {{answer resultIndex questionIndex}}</span>
-            <span class="label label-success">{{firstName resultIndex}}'s Answer: {{response resultIndex questionIndex}}</span>
-            <button id="next" type="button" class="btn btn-default next-previous" aria-label="Next">
-              <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
-            </button>
-          </div>
-          <div class="container" style="text-align:center;float:left;width:100% !important;">
-            <ul style="padding:0">
-              {{#each getResponses resultIndex}}
-              <li class="teacher-tabs">
-                <button id="{{@index}}" style="outline:none;" class="tabs btn btn-{{#if equal this (answer resultIndex @index)}}success{{else}}danger{{/if}} btn-circle{{#if equal @index questionIndex}} active-button{{/if}}"> {{add @index}}</button>
-              </li>
-              {{/each}}
-            </ul>
-          </div>
-        </div>
-        <div class="container" style="text-align:center;float:left;width:50% !important;">
-          <div class="container" style="text-align:center; float:left;width:100% !important;padding-bottom:1em">
-            <img style="max-width:100%;max-height:16em;margin-top:1em" src="{{image resultIndex questionIndex}}">
-          </div>
-          <div class="container" style="text-align:center; float:left;width:100% !important;">
-            <div class="btn-group">
-              <button type="button" class="btn btn-default{{#if equal mode 'question'}} active{{/if}}" id="question-mode">Question</button>
-              <button type="button" class="btn btn-default{{#if equal mode 'solution'}} active{{/if}}" id="solution-mode">Solution</button>
+          <div class="container" style="text-align:center;float:left;width:50% !important;">
+            <div class="container" style="text-align:center; float:left;width:100% !important;padding-bottom:1em">
+              <img style="max-width:100%;max-height:16em;margin-top:1em" src="{{image resultIndex questionIndex}}">
+            </div>
+            <div class="container" style="text-align:center; float:left;width:100% !important;">
+              <div class="btn-group">
+                <button type="button" class="btn btn-default{{#if equal mode 'question'}} active{{/if}}" id="question-mode">Question</button>
+                <button type="button" class="btn btn-default{{#if equal mode 'solution'}} active{{/if}}" id="solution-mode">Solution</button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      {{/unless}}
       {{>credits}}
     </nav>
 </template>
