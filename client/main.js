@@ -214,7 +214,12 @@ function checkMode(){
 
 	window.clearInterval(Session.get('intervalHandle')); //stop the countdown
 	Session.set('mode', 'done');
-	notify('Responses Submitted!', false);
+	setTimeout(
+		function() { //call notification synchronously so it doesn't pop up in the middle of the page
+			resizeStudent();
+			setTimeout(function() { notify('Responses Submitted!', false); }, 0);
+		},
+	0);
 }
 
 /**
@@ -519,7 +524,7 @@ Template.teacher.events({
 	},
 
 	//signout button
-	'click #signout':function(event, instance){
+	'click #signout': function(event, instance){
 		sweetAlert({
 			title:'Are you sure you want to sign out?',
 			type:'warning',
