@@ -275,6 +275,13 @@ Template['teacher'].helpers({
 	},
 
 	/**
+	* @return {boolean} random on or off
+	*/
+	randomization() {
+		return Session.get('random');
+	},
+
+	/**
 	* @return {Integer} the current resultIndex
 	*/
 	resultIndex() {
@@ -513,14 +520,13 @@ Template.teacher.events({
 		resizeTeacher();
 	},
 
-	'click .change-period': function(event,instance) {
-		var index = parseInt($(event.currentTarget).attr('name')),
-			previous = parseInt(Session.get('period'));
-
-		Session.set('period', index);
-
-		if (index !== previous)
-			Session.set('resultIndex', getFirstResultInTableIndex());
+	'click .change-random': function(event,instance) {
+		var random = ('true' === $(event.currentTarget).attr('name'));
+		Meteor.call('setRandomization', random, function (err, res) {
+			if (err)
+				return notify(err.error, true);
+			Session.set('random', random);
+		});
 	},
 
 	//signout button
@@ -638,9 +644,11 @@ function login() {
 			//tally up all student's scores
 			for (var i = 0; i < res.res.length; i++) {
 				var correct = 0;
-				for (var j = 0; j < res.res[i].responses.length; j++)
+				for (var j = 0; j < res.res[i].responses.length; j++) {
+					console.log(res.res[i]);
 					if (res.res[i].responses[j] === res.res[i].test[j].a)
 						correct++;
+				}
 				res.res[i].score = correct + '/' + res.res[i].responses.length;
 			}
 
@@ -648,6 +656,7 @@ function login() {
 			Session.set('mode', 'question');
 			Session.set('testIndex', 0);
 			Session.set('period', 6);
+			Session.set('random', res.random);
 			Session.set('questionIndex', 0);
 			Session.set('results', res.res);
 			Session.set('resultIndex', getFirstResultInTableIndex());

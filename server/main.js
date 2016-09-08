@@ -4,7 +4,8 @@ import { Reflections } from '../mongo/reflections.js';
 
 var nonCalc = [{q:0,a:'A'},{q:1,a:'B'},{q:2,a:'C'},{q:3,a:'D'},{q:4,a:'E'},{q:5,a:'A'},{q:6,a:'B'},{q:7,a:'C'},{q:8,a:'A'},{q:9,a:'B'},{q:10,a:'C'},{q:11,a:'D'},{q:12,a:'E'},{q:13,a:'A'},{q:14,a:'B'},{q:15,a:'C'},{q:16,a:'A'},{q:17,a:'B'},{q:18,a:'C'},{q:19,a:'D'},{q:20,a:'E'},{q:21,a:'A'},{q:22,a:'B'},{q:23,a:'C'}],
   calc = [{q:24,a:'A'},{q:25,a:'B'},{q:26,a:'C'},{q:27,a:'D'},{q:28,a:'A'},{q:29,a:'B'},{q:30,a:'C'},{q:31,a:'D'},{q:32,a:'A'},{q:33,a:'B'},{q:34,a:'C'},{q:35,a:'D'}],
-  students = null;
+  students = null,
+  random = false;
 
 Meteor.startup(() => {
   students = JSON.parse(Assets.getText('students.json'));
@@ -39,7 +40,7 @@ Meteor.methods({
         });
       }
 
-      return { mode: 'teacher', res: res };
+      return { mode: 'teacher', res: res, random: random };
     }
 
     //student login
@@ -101,6 +102,10 @@ Meteor.methods({
       if (err || (res.data.result || '') !== 'success')
         throw new Meteor.Error('Google Spreadsheet could not be updated.');
     });
+  },
+
+  'setRandomization': function(randomVal) {
+    random = randomVal;
   }
 });
 
@@ -148,7 +153,6 @@ function shuffle(arr, studentId) {
     c.splice(i, 1); //remove the pushed element (this algorithm runs until no elements remain)
     seed = seed.substring(1); //remove the first character from the seed so that a different character is used next iteration
   }
-
   return r;
 }
 
@@ -159,14 +163,20 @@ function shuffle(arr, studentId) {
 */
 function getTests(studentId) {
   //shuffle the calc and noncalc arrays based on the studentId
-  var c = shuffle(calc, studentId),
-    nc = shuffle(nonCalc, studentId),
-    res = [];
 
-    //create an array of question arrays, with each row containing 8 noncalc and 4 calc questions
+  var res = [];
+  if (random) {
+    var c = shuffle(calc, studentId),
+      nc = shuffle(nonCalc, studentId);
+  
+      //create an array of question arrays, with each row containing 8 noncalc and 4 calc questions
+      for (var i = 0; i < 3; i++)
+        res.push(nc.slice(i * 8, i * 8 + 8).concat(c.slice(i * 4, i * 4 + 4)));
+  } else {
+    console.log('random is false');
     for (var i = 0; i < 3; i++)
-      res.push(nc.slice(i * 8, i * 8 + 8).concat(c.slice(i * 4, i * 4 + 4)));
-
+        res.push(nonCalc.slice(i * 8, i * 8 + 8).concat(calc.slice(i * 4, i * 4 + 4)));
+  }
   return res;
 }
 
