@@ -197,8 +197,8 @@ function getTestIndex(studentId) {
 * @return {Object[]} the question array making up the test
 */
 function getTest(studentId, testIndex) {
-  if (testIndex > 2)
-    throw new Meteor.Error('You have completed all of the problems.');
+  if (testIndex > 0)
+    throw new Meteor.Error('You have completed all of the problems.'); //CHANGED TO ZERO ATM, CHANGE BACK
 
   return getTests(studentId)[testIndex];
 }
